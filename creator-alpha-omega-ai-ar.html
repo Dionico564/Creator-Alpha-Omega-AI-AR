@@ -1,0 +1,1774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0f172a">
+<title>Creator Alpha Omega AR</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster@1.4.1/dist/MarkerCluster.Default.css"/>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:root{--bg:#0f172a;--panel:#1e293b;--panel2:#263347;--border:#334155;--accent:#22c55e;--blue:#3b82f6;--purple:#8b5cf6;--amber:#f59e0b;--red:#ef4444;--text:#f1f5f9;--muted:#94a3b8;--radius:12px;--shadow:0 4px 24px rgba(0,0,0,.5);}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Arial,sans-serif;height:100%;overflow-x:hidden;}
+#topbar{position:sticky;top:0;z-index:9999;background:linear-gradient(135deg,#0f172a,#1e293b);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:10px 14px;height:53px;}
+#topbar h1{margin:0;font-size:15px;font-weight:700;background:linear-gradient(90deg,#22c55e,#3b82f6,#8b5cf6);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+#topbar-actions{display:flex;gap:6px;align-items:center;}
+.icon-btn{background:var(--panel2);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:6px 10px;font-size:16px;cursor:pointer;}
+#ai-pill{font-size:11px;font-weight:700;border-radius:20px;padding:5px 10px;border:1px solid var(--accent);color:var(--accent);background:var(--panel2);cursor:pointer;}
+#ai-pill.off{border-color:var(--border);color:var(--muted);}
+#tabs{display:flex;background:var(--panel);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none;position:sticky;top:53px;z-index:9998;}
+#tabs::-webkit-scrollbar{display:none;}
+.tab{flex:1;min-width:64px;padding:8px 4px;text-align:center;font-size:11px;font-weight:600;cursor:pointer;border-bottom:3px solid transparent;color:var(--muted);white-space:nowrap;}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.tab-icon{display:block;font-size:18px;margin-bottom:2px;}
+.page{display:none;padding:12px;max-width:760px;margin:0 auto;padding-bottom:84px;}
+.page.active{display:block;}
+.card{background:var(--panel);border-radius:var(--radius);padding:14px;margin-bottom:12px;border:1px solid var(--border);box-shadow:var(--shadow);}
+.card-title{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px;font-weight:500;}
+input,select{width:100%;padding:11px 12px;border-radius:8px;border:1px solid var(--border);background:#1a2744;color:var(--text);font-size:14px;margin-bottom:10px;outline:none;}
+input:focus,select:focus{border-color:var(--accent);}
+input[type=range]{padding:4px 0;background:transparent;border:none;margin-bottom:0;height:20px;accent-color:var(--accent);}
+input[type=checkbox]{width:auto;margin:0;accent-color:var(--accent);}
+.btn{width:100%;padding:12px;border-radius:8px;border:none;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;display:flex;align-items:center;justify-content:center;gap:6px;color:#fff;}
+.btn:active{transform:scale(.97);}
+.btn-green{background:linear-gradient(135deg,#22c55e,#16a34a);}
+.btn-blue{background:linear-gradient(135deg,#3b82f6,#2563eb);}
+.btn-purple{background:linear-gradient(135deg,#8b5cf6,#7c3aed);}
+.btn-amber{background:linear-gradient(135deg,#f59e0b,#d97706);}
+.btn-red{background:linear-gradient(135deg,#ef4444,#dc2626);}
+.btn-slate{background:#334155;}
+.btn-sm{padding:7px 10px;font-size:12px;width:auto;margin:0;}
+.btn-row{display:flex;gap:8px;margin-bottom:8px;}
+.btn-row .btn{margin-bottom:0;}
+#stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:12px;}
+.stat-card{background:var(--panel2);border-radius:8px;padding:8px;text-align:center;border:1px solid var(--border);}
+.stat-val{font-size:20px;font-weight:800;color:var(--accent);}
+.stat-label{font-size:10px;color:var(--muted);text-transform:uppercase;}
+#history{max-height:420px;overflow-y:auto;overscroll-behavior:contain;}
+.history-item{display:flex;align-items:center;gap:8px;padding:9px 6px;border-bottom:1px solid var(--border);font-size:12px;flex-wrap:wrap;}
+.item-text{flex:1;min-width:0;word-break:break-word;cursor:pointer;line-height:1.4;}
+.item-buttons{display:flex;gap:4px;flex-wrap:wrap;}
+.item-btn{padding:5px 8px;border-radius:5px;border:none;font-size:11px;cursor:pointer;color:#fff;font-weight:600;}
+.ib-origin{background:var(--amber);}.ib-dup{background:var(--purple);}.ib-edit{background:var(--blue);}.ib-del{background:var(--red);}
+#map{height:360px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);}
+.slider-item{margin-bottom:10px;}
+.slider-row{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px;}
+.slider-val{font-weight:700;color:var(--accent);}
+.chip-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;}
+.chip{display:flex;align-items:center;gap:5px;background:var(--panel2);border:1px solid var(--border);border-radius:20px;padding:5px 10px;font-size:12px;cursor:pointer;margin:0;color:var(--text);}
+.chip input{width:16px;height:16px;margin:0;}
+#toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%) translateY(20px);background:#22c55e;color:#fff;padding:10px 20px;border-radius:30px;font-size:13px;font-weight:700;opacity:0;transition:all .35s;z-index:99999;pointer-events:none;max-width:90vw;text-align:center;}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+#toast.error{background:var(--red);}#toast.warn{background:var(--amber);}
+#bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:99990;background:var(--panel);border-top:1px solid var(--border);display:flex;padding-bottom:env(safe-area-inset-bottom);}
+.bnav-btn{flex:1;padding:8px 0;text-align:center;font-size:10px;font-weight:600;cursor:pointer;color:var(--muted);border:none;background:transparent;}
+.bnav-btn.active{color:var(--accent);}
+.bnav-icon{display:block;font-size:19px;}
+.emoji-marker-icon{font-size:20px;display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:rgba(255,255,255,.9);border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.4);}
+.health-bar{height:4px;border-radius:2px;background:#334155;overflow:hidden;margin-top:3px;}
+.health-fill{height:100%;background:linear-gradient(90deg,#ef4444,#22c55e);}
+#gps-btn{position:absolute;bottom:12px;right:12px;z-index:500;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:18px;cursor:pointer;color:var(--text);}
+#map-wrap{position:relative;}
+.danger-zone{border:1px solid var(--red)!important;}
+#geo-search-wrap{position:relative;}
+#geo-results{position:absolute;top:100%;left:0;right:0;background:var(--panel2);border:1px solid var(--border);border-radius:8px;z-index:1000;max-height:180px;overflow-y:auto;display:none;}
+.geo-result-item{padding:10px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--border);}
+#coords-badge{display:inline-flex;background:var(--panel2);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:11px;color:var(--muted);margin-bottom:10px;}
+#coords-badge.set{border-color:var(--accent);color:var(--accent);}
+#live-clock{font-size:11px;color:var(--muted);text-align:right;}
+#event-log,#ai-log{font-size:11px;color:var(--muted);max-height:200px;overflow-y:auto;font-family:monospace;padding:8px;}
+.log-line{padding:2px 0;border-bottom:1px solid rgba(255,255,255,.04);word-break:break-word;}
+.log-create{color:#22c55e}.log-death{color:#ef4444}.log-repro{color:#8b5cf6}.log-calamity{color:#f59e0b}
+.log-ai{color:#38bdf8}.log-err{color:#ef4444}.log-fix{color:#f59e0b}.log-you{color:#e2e8f0}
+#ai-issues{margin:8px 0 0;padding-left:18px;font-size:12px;color:var(--muted);line-height:1.5;}
+#ai-stats{font-size:11px;color:var(--muted);margin-top:6px;}
+
+/* ── AR ── */
+#ar-page{display:none;position:fixed;left:0;right:0;padding:0;margin:0;max-width:none;background:#000;z-index:9990;overflow:hidden;touch-action:none;}
+#ar-page.active{display:block;}
+#ar-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000;}
+#ar-canvas{position:absolute;inset:0;width:100%;height:100%;}
+#ar-start{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;background:radial-gradient(circle at 50% 40%,#1e293b,#020617);padding:24px;text-align:center;z-index:5;}
+#ar-start p{color:var(--muted);font-size:13px;max-width:320px;line-height:1.5;margin:0;}
+#ar-start .btn{max-width:320px;}
+#ar-hud{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;gap:6px;z-index:4;pointer-events:none;}
+.hud-pill{background:rgba(15,23,42,.72);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:4px 10px;font-size:11px;color:#fff;font-variant-numeric:tabular-nums;backdrop-filter:blur(4px);}
+#ar-controls{position:absolute;bottom:10px;left:8px;right:8px;z-index:4;display:flex;flex-direction:column;gap:6px;}
+#ar-controls .btn-row{margin:0;}
+#ar-controls .btn{padding:10px;font-size:12px;margin:0;}
+#ar-range-wrap{background:rgba(15,23,42,.72);border-radius:10px;padding:6px 10px;border:1px solid rgba(255,255,255,.15);}
+#ar-range-wrap .slider-row{color:#fff;margin:0;}
+#ar-info{position:absolute;left:8px;right:8px;top:48px;z-index:4;background:rgba(15,23,42,.88);border:1px solid var(--border);border-radius:12px;padding:10px;font-size:12px;display:none;line-height:1.5;}
+#ar-info .btn{margin:6px 0 0;padding:8px;font-size:12px;}
+</style>
+</head>
+<body>
+
+<div id="topbar">
+  <h1>⚡ Creator Alpha Omega AR</h1>
+  <div id="topbar-actions">
+    <button id="ai-pill" title="Toggle AI Director">🤖 AI ON</button>
+    <button class="icon-btn" id="export-btn" title="Export">💾</button>
+    <button class="icon-btn" id="import-btn" title="Import">📂</button>
+    <input type="file" id="import-file" accept=".json" style="display:none">
+  </div>
+</div>
+
+<div id="tabs">
+  <div class="tab active" data-page="create"><span class="tab-icon">✨</span>Create</div>
+  <div class="tab" data-page="ar-page"><span class="tab-icon">📷</span>AR</div>
+  <div class="tab" data-page="map-page"><span class="tab-icon">🗺️</span>Map</div>
+  <div class="tab" data-page="list-page"><span class="tab-icon">📋</span>List</div>
+  <div class="tab" data-page="eco-page"><span class="tab-icon">🌿</span>Ecology</div>
+  <div class="tab" data-page="ai-page"><span class="tab-icon">🤖</span>AI</div>
+  <div class="tab" data-page="settings-page"><span class="tab-icon">⚙️</span>Settings</div>
+</div>
+
+<div id="toast"></div>
+
+<!-- CREATE -->
+<div class="page active" id="create">
+  <div id="stats">
+    <div class="stat-card"><div class="stat-val" id="stat-total">0</div><div class="stat-label">Total</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-objects" style="color:#3b82f6">0</div><div class="stat-label">📦 Objects</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-organisms">0</div><div class="stat-label">🧬 Life</div></div>
+    <div class="stat-card"><div class="stat-val" id="stat-calamities" style="color:#ef4444">0</div><div class="stat-label">💥 Events</div></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📍 Location & Time</div>
+    <div id="geo-search-wrap">
+      <input type="text" id="geo-search" placeholder="🔍 Search place name...">
+      <div id="geo-results"></div>
+    </div>
+    <div id="coords-badge">📍 No location set — tap map, search, or use AR</div>
+    <input type="hidden" id="target-location">
+    <div style="display:flex;gap:8px;">
+      <div style="flex:1"><label>Date</label><input type="date" id="target-date"></div>
+      <div style="flex:1"><label>Time</label><input type="time" id="target-time"></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🌍 Creation</div>
+    <label>Type</label>
+    <select id="creation-type">
+      <option value="object">📦 Object</option>
+      <option value="organism">🧬 Organism</option>
+      <option value="calamity">💥 Calamity</option>
+    </select>
+    <label id="type-label">Object Type</label>
+    <select id="object-type-select">
+      <optgroup label="🚗 Vehicles">
+        <option value="Car">🚗 Car</option><option value="Truck">🚚 Truck</option><option value="Bus">🚌 Bus</option>
+        <option value="Motorcycle">🏍️ Motorcycle</option><option value="Tricycle">🛵 Tricycle</option><option value="Tank">🚜 Tank</option>
+        <option value="Submarine">🛥️ Submarine</option><option value="Boat">⛵ Boat</option><option value="Ship">🚢 Ship</option>
+        <option value="Yacht">🛥️ Yacht</option><option value="Helicopter">🚁 Helicopter</option><option value="Jet">🛩️ Jet</option>
+        <option value="Airplane">✈️ Airplane</option><option value="Rocket">🚀 Rocket</option><option value="Spaceship">🚀 Spaceship</option>
+        <option value="UFO">🛸 UFO</option><option value="UFO Mothership">🛸 UFO Mothership</option><option value="Time Machine">⏰ Time Machine</option>
+      </optgroup>
+      <optgroup label="🏠 Structures">
+        <option value="House">🏠 House</option><option value="Skyscraper">🏢 Skyscraper</option><option value="Castle">🏰 Castle</option>
+        <option value="Temple">🏯 Temple</option><option value="Church">⛪ Church</option><option value="Bridge">🌉 Bridge</option>
+        <option value="Dam">🏞️ Dam</option><option value="City">🏙️ City</option><option value="Floating City">🌆 Floating City</option>
+        <option value="Underwater Base">⚓ Underwater Base</option>
+      </optgroup>
+      <optgroup label="🌍 Geography">
+        <option value="Mountain">⛰️ Mountain</option><option value="Volcano">🌋 Volcano</option><option value="Island">🏝️ Island</option>
+        <option value="Continent">🌍 Continent</option><option value="Ocean">🌊 Ocean</option><option value="Forest">🌳 Forest</option>
+        <option value="Desert">🏜️ Desert</option><option value="Jungle">🌴 Jungle</option><option value="Glacier">🏔️ Glacier</option>
+      </optgroup>
+      <optgroup label="🪐 Space">
+        <option value="Planet">🪐 Planet</option><option value="Moon">🌕 Moon</option><option value="Star">⭐ Star</option>
+        <option value="Black Hole">⚫ Black Hole</option><option value="Nebula">🌌 Nebula</option><option value="Galaxy">🌠 Galaxy</option>
+        <option value="Asteroid">☄️ Asteroid</option><option value="Universe">🌌 Universe</option><option value="Multiverse">♾️ Multiverse</option>
+      </optgroup>
+    </select>
+    <select id="organism-type-select" style="display:none;">
+      <optgroup label="👤 Human">
+        <option value="Human">🧑 Human</option><option value="Superhuman">🦸 Superhuman</option><option value="Mutant">🧬 Mutant</option>
+        <option value="Cyborg">🤖 Cyborg</option><option value="AI Humanoid Robot">🤖 AI Humanoid Robot</option>
+      </optgroup>
+      <optgroup label="🐾 Animals">
+        <option value="Animal">🐾 Animal</option><option value="Mammal">🐻 Mammal</option><option value="Reptile">🐍 Reptile</option>
+        <option value="Amphibian">🐸 Amphibian</option><option value="Bird">🐦 Bird</option><option value="Fish">🐠 Fish</option>
+        <option value="Insect">🐛 Insect</option>
+      </optgroup>
+      <optgroup label="🦄 Mythical">
+        <option value="Mythical Beast">🦄 Mythical Beast</option><option value="Dragon">🐉 Dragon</option><option value="Phoenix">🐦 Phoenix</option>
+        <option value="Angel">😇 Angel</option><option value="Demon">😈 Demon</option><option value="Spirit">👻 Spirit</option>
+        <option value="Deity">✨ Deity</option><option value="Celestial Being">🌟 Celestial Being</option>
+      </optgroup>
+      <optgroup label="🌱 Flora">
+        <option value="Plant">🌱 Plant</option><option value="Tree">🌲 Tree</option><option value="Flower">🌸 Flower</option>
+        <option value="Giant Tree">🌳 Giant Tree</option><option value="Alien Plant">👽 Alien Plant</option>
+      </optgroup>
+      <optgroup label="🦠 Micro">
+        <option value="Microorganism">🦠 Microorganism</option><option value="Bacteria">🦠 Bacteria</option>
+        <option value="Virus">🦠 Virus</option><option value="Fungus">🍄 Fungus</option>
+      </optgroup>
+      <optgroup label="👽 Alien">
+        <option value="Alien">👽 Alien</option><option value="Extraterrestrial">🪐 Extraterrestrial</option>
+        <option value="Alien Human Hybrid">👽 Alien Human Hybrid</option><option value="Alien Animal Hybrid">👽 Alien Animal Hybrid</option>
+        <option value="Human Animal Hybrid">🧑 Human Animal Hybrid</option><option value="Robot Animal Hybrid">🤖 Robot Animal Hybrid</option>
+      </optgroup>
+    </select>
+    <select id="calamity-type-select" style="display:none;">
+      <optgroup label="🌍 Natural">
+        <option value="Earthquake">🌍 Earthquake</option><option value="Tsunami">🌊 Tsunami</option>
+        <option value="Volcanic Eruption">🌋 Volcanic Eruption</option><option value="Tornado">🌪️ Tornado</option>
+        <option value="Hurricane">🌀 Hurricane</option><option value="Flood">💧 Flood</option>
+        <option value="Wildfire">🔥 Wildfire</option><option value="Blizzard">❄️ Blizzard</option><option value="Drought">🏜️ Drought</option>
+      </optgroup>
+      <optgroup label="☄️ Cosmic">
+        <option value="Meteor Strike">☄️ Meteor Strike</option><option value="Solar Flare">☀️ Solar Flare</option>
+        <option value="Gamma Ray Burst">⚡ Gamma Ray Burst</option><option value="Supernova">💥 Supernova</option>
+        <option value="Black Hole Merger">⚫ Black Hole Merger</option>
+      </optgroup>
+      <optgroup label="🌀 Anomaly">
+        <option value="Plague">🦠 Plague</option><option value="Alien Invasion">👽 Alien Invasion</option>
+        <option value="Time Anomaly">⏳ Time Anomaly</option><option value="Dimension Rift">🌀 Dimension Rift</option>
+      </optgroup>
+    </select>
+    <label>Name</label>
+    <div style="display:flex;gap:8px;align-items:flex-start;">
+      <input type="text" id="object-name" placeholder="Enter name" style="margin-bottom:0;flex:1" maxlength="60">
+      <button class="btn btn-slate btn-sm" id="random-name-btn" style="padding:11px 12px;">🎲</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">⚙️ Properties</div>
+    <div style="display:flex;gap:8px;">
+      <div style="flex:1"><label>⏳ Lifespan</label><input type="number" id="lifespan" value="0" min="0" step="1"></div>
+      <div style="flex:1"><label>Unit</label><select id="lifespan-unit"><option value="seconds">Seconds</option><option value="moves">Moves</option></select></div>
+      <div style="flex:1"><label>❤️ Health</label><input type="number" id="health" value="100" min="1" max="1000"></div>
+    </div>
+    <div id="calamity-extra" style="display:none;">
+      <div style="display:flex;gap:8px;">
+        <div style="flex:1"><label>💥 Strength</label><input type="number" id="calamity-strength" value="50" min="1" max="200"></div>
+        <div style="flex:1"><label>📡 Radius (km)</label><input type="number" id="calamity-radius" value="10" min="1" max="500"></div>
+      </div>
+    </div>
+    <label>🔮 Quantum URL (optional)</label>
+    <input type="url" id="quantum-url" placeholder="https://micius.quantum/" value="https://micius.quantum/">
+    <div class="chip-row">
+      <label class="chip"><input type="checkbox" id="snap-grid"> 📐 Snap 0.001°</label>
+    </div>
+  </div>
+  <button class="btn btn-green" id="create-button">✨ Create Now</button>
+  <div class="btn-row">
+    <button class="btn btn-slate" id="random-btn">🎲 Random Fill</button>
+    <button class="btn btn-blue" id="reset-form">🔄 Reset</button>
+  </div>
+</div>
+
+<!-- AR -->
+<div class="page" id="ar-page">
+  <video id="ar-video" autoplay playsinline muted></video>
+  <canvas id="ar-canvas"></canvas>
+  <div id="ar-hud">
+    <span class="hud-pill" id="hud-heading">🧭 ---°</span>
+    <span class="hud-pill" id="hud-gps">📡 no fix</span>
+    <span class="hud-pill" id="hud-count">0 in view</span>
+  </div>
+  <div id="ar-info"></div>
+  <div id="ar-controls">
+    <div id="ar-range-wrap">
+      <div class="slider-row"><span>AR range</span><span class="slider-val" id="ar-range-val">500 m</span></div>
+      <input type="range" id="ar-range" min="0" max="100" value="40" step="1" style="width:100%;margin:0;">
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-green" id="ar-spawn">✨ Spawn Ahead</button>
+      <button class="btn btn-blue" id="ar-recenter">🎯 Calibrate</button>
+      <button class="btn btn-red" id="ar-stop">⏹️ Stop</button>
+    </div>
+  </div>
+  <div id="ar-start">
+    <div style="font-size:48px">📷</div>
+    <h2 style="margin:0">Augmented Reality</h2>
+    <p>Your creations appear over the live camera. Allow camera, motion and location access. Without sensors, drag to look around.</p>
+    <button class="btn btn-green" id="ar-start-btn">▶️ Start AR</button>
+    <button class="btn btn-slate" id="ar-demo-btn">🖐️ Start without camera</button>
+  </div>
+</div>
+
+<!-- MAP -->
+<div class="page" id="map-page">
+  <div class="card">
+    <div class="card-title">🗺️ World Map</div>
+    <p style="margin:0 0 8px;font-size:11px;color:var(--muted);text-align:center;">Tap map to set target location</p>
+    <div id="map-wrap"><div id="map"></div><button id="gps-btn" title="My Location">📍</button></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-blue btn-sm" id="center-all-btn" style="flex:1;padding:10px;">🌍 Fit All</button>
+    <button class="btn btn-slate btn-sm" id="toggle-visibility-btn" style="flex:1;padding:10px;">👁️ Hide</button>
+    <button class="btn btn-purple btn-sm" id="toggle-move-btn" style="flex:1;padding:10px;">⏸️ Pause</button>
+  </div>
+</div>
+
+<!-- LIST -->
+<div class="page" id="list-page">
+  <div class="card">
+    <div class="card-title">📋 Creations</div>
+    <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <input type="text" id="history-filter" placeholder="🔍 Search name or type…" style="margin-bottom:0;flex:1;">
+      <button class="btn btn-slate btn-sm" id="clear-filter" style="padding:10px 12px;">✖</button>
+    </div>
+    <div id="history"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-red" id="clear-markers">🗑️ Clear All</button>
+    <button class="btn btn-amber" id="cull-btn">✂️ Cull to Max</button>
+  </div>
+  <label class="chip" style="display:inline-flex"><input type="checkbox" id="merge-checkbox"> Merge on Import</label>
+</div>
+
+<!-- ECOLOGY -->
+<div class="page" id="eco-page">
+  <div class="card">
+    <div class="card-title">🌿 Ecology Settings</div>
+    <div class="chip-row">
+      <label class="chip"><input type="checkbox" id="enable-ecology" checked> 🌿 Ecology Active</label>
+      <label class="chip"><input type="checkbox" id="enable-reproduction" checked> 🧬 Reproduction</label>
+    </div>
+    <div class="slider-item"><div class="slider-row"><span>Ecology Check</span><span class="slider-val" id="eco-value">3 s</span></div><input type="range" id="eco-interval" min="1" max="10" value="3" step="1"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">🧬 Reproduction</div>
+    <div class="slider-item"><div class="slider-row"><span>Rate</span><span class="slider-val" id="repro-rate-value">0.10</span></div><input type="range" id="repro-rate" min="0" max="0.5" value="0.1" step="0.01"></div>
+    <div class="slider-item"><div class="slider-row"><span>Range</span><span class="slider-val" id="repro-range-value">20 km</span></div><input type="range" id="repro-range" min="1" max="100" value="20" step="1"></div>
+    <div class="slider-item"><div class="slider-row"><span>Max Population</span><span class="slider-val" id="max-pop-value">50</span></div><input type="range" id="max-pop" min="1" max="200" value="50" step="1"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">🚶 Movement</div>
+    <div class="slider-item"><div class="slider-row"><span>Speed</span><span class="slider-val" id="speed-value">1200 ms</span></div><input type="range" id="move-speed" min="300" max="5000" value="1200" step="100"></div>
+    <div class="slider-item"><div class="slider-row"><span>Radius</span><span class="slider-val" id="radius-value">50 km</span></div><input type="range" id="move-radius" min="1" max="200" value="50" step="1"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📜 Event Log</div>
+    <div id="event-log"><div class="log-line">— No events yet —</div></div>
+  </div>
+</div>
+
+<!-- AI -->
+<div class="page" id="ai-page">
+  <div class="card">
+    <div class="card-title">🤖 AI Director</div>
+    <div class="chip-row">
+      <label class="chip"><input type="checkbox" id="ai-enabled" checked> 🤖 AI Active</label>
+    </div>
+    <label>Mode</label>
+    <select id="ai-mode">
+      <option value="balanced">⚖️ Balanced — keep the ecosystem stable</option>
+      <option value="gardener">🌱 Gardener — protect &amp; nurture life</option>
+      <option value="chaos">🔥 Chaos — drama &amp; disasters</option>
+      <option value="observer">👁️ Observer — monitor &amp; repair only</option>
+    </select>
+    <div class="slider-item"><div class="slider-row"><span>Think every</span><span class="slider-val" id="ai-interval-val">6 s</span></div><input type="range" id="ai-interval" min="2" max="30" value="6" step="1"></div>
+    <div class="slider-item"><div class="slider-row"><span>Target population</span><span class="slider-val" id="ai-target-val">20</span></div><input type="range" id="ai-target" min="2" max="100" value="20" step="1"></div>
+    <div class="chip-row">
+      <label class="chip"><input type="checkbox" id="ai-a-spawn" checked> 🌱 Spawn life</label>
+      <label class="chip"><input type="checkbox" id="ai-a-balance" checked> ⚖️ Balance</label>
+      <label class="chip"><input type="checkbox" id="ai-a-events" checked> 💥 Events</label>
+      <label class="chip"><input type="checkbox" id="ai-a-tune" checked> 🎚️ Auto-tune</label>
+      <label class="chip"><input type="checkbox" id="ai-a-heal" checked> 🔧 Self-heal</label>
+      <label class="chip"><input type="checkbox" id="ai-a-cleanup" checked> 🌫️ Clean events</label>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">💬 Command the AI</div>
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="ai-cmd" placeholder='e.g. "spawn 5 dragons", "trigger earthquake"' style="margin-bottom:0;flex:1" autocomplete="off">
+      <button class="btn btn-purple btn-sm" id="ai-run" style="padding:10px 14px;">▶</button>
+    </div>
+    <div class="btn-row" style="flex-wrap:wrap;margin-top:8px;">
+      <button class="btn btn-slate btn-sm" data-cmd="balance" style="flex:1">⚖️ Balance</button>
+      <button class="btn btn-slate btn-sm" data-cmd="populate" style="flex:1">🌱 Populate</button>
+      <button class="btn btn-slate btn-sm" data-cmd="heal all" style="flex:1">💚 Heal</button>
+      <button class="btn btn-slate btn-sm" data-cmd="status" style="flex:1">📊 Status</button>
+      <button class="btn btn-slate btn-sm" data-cmd="help" style="flex:1">❓ Help</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🩺 Simulator Health</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="stat-val" id="ai-score" style="min-width:64px;">100%</div>
+      <div style="flex:1"><div class="health-bar" style="height:8px;"><div class="health-fill" id="ai-score-bar" style="width:100%"></div></div></div>
+    </div>
+    <ul id="ai-issues"><li>✅ No problems detected</li></ul>
+    <button class="btn btn-amber" id="ai-repair" style="margin-top:10px;">🔧 Run Diagnostics &amp; Repair</button>
+    <div id="ai-stats"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">🧠 AI Log</div>
+    <div id="ai-log"><div class="log-line" data-empty="1">— AI standing by —</div></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="page" id="settings-page">
+  <div class="card danger-zone">
+    <div class="card-title" style="color:var(--red);">⚠️ Danger Zone</div>
+    <button class="btn btn-red" id="clear-all-btn">🗑️ Delete ALL Creations</button>
+    <button class="btn btn-amber" id="reset-localstorage-btn">🔄 Reset Local Storage</button>
+  </div>
+  <div class="card">
+    <div class="card-title">ℹ️ About</div>
+    <p style="font-size:13px;color:var(--muted);line-height:1.6;">
+      <b style="color:var(--text);">Creator Alpha Omega AR</b> — v5.0<br>
+      Ecology simulation in augmented reality, managed by a self-healing AI Director.
+    </p>
+    <div id="live-clock"></div>
+  </div>
+</div>
+
+<div id="bottom-nav">
+  <button class="bnav-btn active" data-page="create"><span class="bnav-icon">✨</span>Create</button>
+  <button class="bnav-btn" data-page="ar-page"><span class="bnav-icon">📷</span>AR</button>
+  <button class="bnav-btn" data-page="map-page"><span class="bnav-icon">🗺️</span>Map</button>
+  <button class="bnav-btn" data-page="list-page"><span class="bnav-icon">📋</span>List</button>
+  <button class="bnav-btn" data-page="eco-page"><span class="bnav-icon">🌿</span>Eco</button>
+  <button class="bnav-btn" data-page="ai-page"><span class="bnav-icon">🤖</span>AI</button>
+  <button class="bnav-btn" data-page="settings-page"><span class="bnav-icon">⚙️</span>More</button>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet.markercluster@1.4.1/dist/leaflet.markercluster.js"></script>
+<script>
+(function(){
+'use strict';
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const safeUrl=u=>/^https?:\/\//i.test(u||'')?u:'';
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const toRad=d=>d*Math.PI/180, toDeg=r=>r*180/Math.PI;
+const pad2=n=>String(n).padStart(2,'0');
+const localDate=(d)=>{d=d||new Date();return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate());};
+const localTime=(d)=>{d=d||new Date();return pad2(d.getHours())+':'+pad2(d.getMinutes());};
+
+// ── EMOJIS ──
+const emojiTypes={
+  Object:{"Car":"🚗","Truck":"🚚","Bus":"🚌","Motorcycle":"🏍️","Tricycle":"🛵","Tank":"🚜","Submarine":"🛥️","Boat":"⛵","Ship":"🚢","Yacht":"🛥️","Helicopter":"🚁","Jet":"🛩️","Airplane":"✈️","Rocket":"🚀","Spaceship":"🚀","UFO":"🛸","UFO Mothership":"🛸","Time Machine":"⏰","House":"🏠","Skyscraper":"🏢","Castle":"🏰","Temple":"🏯","Church":"⛪","Bridge":"🌉","Dam":"🏞️","City":"🏙️","Floating City":"🌆","Underwater Base":"⚓","Mountain":"⛰️","Volcano":"🌋","Island":"🏝️","Continent":"🌍","Ocean":"🌊","Forest":"🌳","Desert":"🏜️","Jungle":"🌴","Glacier":"🏔️","Planet":"🪐","Moon":"🌕","Star":"⭐","Black Hole":"⚫","Nebula":"🌌","Galaxy":"🌠","Asteroid":"☄️","Universe":"🌌","Multiverse":"♾️"},
+  Organism:{"Human":"🧑","Superhuman":"🦸","Mutant":"🧬","Cyborg":"🤖","AI Humanoid Robot":"🤖","Animal":"🐾","Mammal":"🐻","Reptile":"🐍","Amphibian":"🐸","Bird":"🐦","Fish":"🐠","Insect":"🐛","Mythical Beast":"🦄","Dragon":"🐉","Phoenix":"🐦","Plant":"🌱","Tree":"🌲","Flower":"🌸","Alien Plant":"👽","Giant Tree":"🌳","Microorganism":"🦠","Bacteria":"🦠","Virus":"🦠","Fungus":"🍄","Alien":"👽","Extraterrestrial":"🪐","Alien Human Hybrid":"👽","Alien Animal Hybrid":"👽","Human Animal Hybrid":"🧑","Robot Animal Hybrid":"🤖","Angel":"😇","Demon":"😈","Spirit":"👻","Deity":"✨","Celestial Being":"🌟"},
+  Calamity:{"Earthquake":"🌍","Tsunami":"🌊","Volcanic Eruption":"🌋","Meteor Strike":"☄️","Tornado":"🌪️","Hurricane":"🌀","Flood":"💧","Wildfire":"🔥","Blizzard":"❄️","Drought":"🏜️","Plague":"🦠","Alien Invasion":"👽","Solar Flare":"☀️","Gamma Ray Burst":"⚡","Supernova":"💥","Black Hole Merger":"⚫","Time Anomaly":"⏳","Dimension Rift":"🌀"}
+};
+function getEmoji(type,detail){
+  const cat=type==='object'?'Object':type==='organism'?'Organism':'Calamity';
+  return (emojiTypes[cat]&&emojiTypes[cat][detail])||'❓';
+}
+// AR altitude (meters above eye level) for airborne / celestial types
+const AR_ALT={"Helicopter":60,"Jet":300,"Airplane":400,"Rocket":500,"Spaceship":800,"UFO":150,"UFO Mothership":600,"Floating City":250,"Planet":2000,"Moon":2500,"Star":3000,"Nebula":3000,"Galaxy":3500,"Asteroid":900,"Universe":4000,"Multiverse":4500,"Black Hole":3000,"Bird":25,"Phoenix":80,"Dragon":70,"Angel":50,"Celestial Being":120,"Meteor Strike":600,"Solar Flare":1500,"Supernova":2500,"Gamma Ray Burst":2000,"Black Hole Merger":2800,"Dimension Rift":40,"Time Anomaly":10,"Submarine":-20,"Underwater Base":-30,"Fish":-3};
+
+// ── STATE ──
+let creationMarkers=[],targetMarker=null;
+let movementEnabled=true,markersVisible=true;
+let movementSpeed=1200,movementRadius=50000;
+let ecologyEnabled=true,ecoIntervalTime=3000,ecoIntervalId=null;
+let reproductionEnabled=true,reproductionRate=0.1,reproductionRange=20000,maxPopulation=50;
+let selectedLat=null,selectedLng=null;
+let currentPage='create';
+
+// ── MAP ──
+const map=L.map('map',{zoomControl:true,attributionControl:false}).setView([14.65,120.98],5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19}).addTo(map);
+const markerCluster=L.markerClusterGroup({maxClusterRadius:50,zoomToBoundsOnClick:true});
+map.addLayer(markerCluster);
+const dist=(aLat,aLng,bLat,bLng)=>map.distance(L.latLng(aLat,aLng),L.latLng(bLat,bLng));
+
+// ── NAV ──
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab,.bnav-btn').forEach(t=>t.classList.remove('active'));
+  const page=$(id);if(page)page.classList.add('active');
+  document.querySelectorAll('[data-page="'+id+'"]').forEach(t=>t.classList.add('active'));
+  const prev=currentPage;currentPage=id;
+  if(id==='map-page')setTimeout(()=>map.invalidateSize(),120);
+  if(id==='ar-page'){window.layoutAR();}
+  if(prev==='ar-page'&&id!=='ar-page'){AR.pause();}
+  if(id==='ar-page'&&AR.running){AR.resume();}
+}
+document.querySelectorAll('.tab,.bnav-btn').forEach(t=>t.addEventListener('click',()=>showPage(t.dataset.page)));
+
+// ── TOAST ──
+let toastTimer=null;
+function showToast(msg,type=''){
+  const el=$('toast');el.textContent=msg;el.className='show'+(type?' '+type:'');
+  clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.className='';},2500);
+}
+
+// ── LOG ──
+const logEl=$('event-log');
+function logEvent(msg,cls=''){
+  const first=logEl.firstElementChild;
+  if(first&&first.textContent.includes('No events'))logEl.innerHTML='';
+  const line=document.createElement('div');
+  line.className='log-line'+(cls?' '+cls:'');
+  const t=new Date().toLocaleTimeString('en',{hour12:false,hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  line.textContent='['+t+'] '+msg;
+  logEl.prepend(line);
+  while(logEl.children.length>60)logEl.removeChild(logEl.lastChild);
+}
+setInterval(()=>{$('live-clock').textContent='🕐 '+new Date().toLocaleString();},1000);
+
+// ── TYPE SWITCH ──
+const creationTypeSelect=$('creation-type'),objectTypeSelect=$('object-type-select'),organismTypeSelect=$('organism-type-select'),calamityTypeSelect=$('calamity-type-select'),typeLabel=$('type-label'),calamityExtra=$('calamity-extra');
+creationTypeSelect.addEventListener('change',()=>{
+  const v=creationTypeSelect.value;
+  objectTypeSelect.style.display=organismTypeSelect.style.display=calamityTypeSelect.style.display=calamityExtra.style.display='none';
+  if(v==='object'){objectTypeSelect.style.display='block';typeLabel.textContent='Object Type';}
+  else if(v==='organism'){organismTypeSelect.style.display='block';typeLabel.textContent='Organism Type';}
+  else{calamityTypeSelect.style.display='block';calamityExtra.style.display='block';typeLabel.textContent='Calamity Type';}
+});
+function currentTypeDetail(){
+  const v=creationTypeSelect.value;
+  return v==='object'?objectTypeSelect.value:v==='organism'?organismTypeSelect.value:calamityTypeSelect.value;
+}
+
+// ── COORDS ──
+function setCoords(lat,lng){
+  selectedLat=lat;selectedLng=lng;
+  const b=$('coords-badge');b.textContent='📍 '+lat.toFixed(5)+', '+lng.toFixed(5);b.className='set';
+  $('target-location').value=lat.toFixed(5)+','+lng.toFixed(5);
+}
+function clearCoords(){
+  selectedLat=selectedLng=null;
+  const b=$('coords-badge');b.textContent='📍 No location set — tap map, search, or use AR';b.className='';
+}
+map.on('click',e=>{
+  let{lat,lng}=e.latlng;
+  if($('snap-grid').checked){lat=Math.round(lat*1000)/1000;lng=Math.round(lng*1000)/1000;}
+  placeTargetMarker(lat,lng);
+});
+function placeTargetMarker(lat,lng){
+  if(targetMarker)map.removeLayer(targetMarker);
+  targetMarker=L.marker([lat,lng],{draggable:true,zIndexOffset:1000}).addTo(map);
+  targetMarker.bindPopup('<b>📍 Target</b><br>'+lat.toFixed(5)+', '+lng.toFixed(5));
+  setCoords(lat,lng);
+  targetMarker.on('dragend',()=>{
+    const p=targetMarker.getLatLng();
+    let la=p.lat,ln=p.lng;
+    if($('snap-grid').checked){la=Math.round(la*1000)/1000;ln=Math.round(ln*1000)/1000;targetMarker.setLatLng([la,ln]);}
+    setCoords(la,ln);
+  });
+}
+
+// ── GPS (map button) ──
+$('gps-btn').addEventListener('click',()=>{
+  if(!navigator.geolocation){showToast('GPS not available','error');return;}
+  navigator.geolocation.getCurrentPosition(pos=>{
+    const{latitude:lat,longitude:lng}=pos.coords;
+    map.setView([lat,lng],14);placeTargetMarker(lat,lng);showToast('📍 Location set!');
+  },err=>showToast('GPS error: '+err.message,'error'),{enableHighAccuracy:true,timeout:15000});
+});
+
+// ── GEO SEARCH ──
+const geoInput=$('geo-search'),geoResults=$('geo-results');let geoTimer=null;
+geoInput.addEventListener('input',function(){
+  clearTimeout(geoTimer);const q=this.value.trim();
+  if(q.length<3){geoResults.style.display='none';return;}
+  geoTimer=setTimeout(()=>{
+    fetch('https://nominatim.openstreetmap.org/search?format=json&q='+encodeURIComponent(q)+'&limit=5')
+      .then(r=>{if(!r.ok)throw new Error('http '+r.status);return r.json();})
+      .then(data=>{
+        geoResults.innerHTML='';
+        if(!Array.isArray(data)||!data.length){geoResults.style.display='none';return;}
+        data.forEach(item=>{
+          const div=document.createElement('div');div.className='geo-result-item';div.textContent=item.display_name;
+          div.addEventListener('click',()=>{
+            const lat=parseFloat(item.lat),lng=parseFloat(item.lon);
+            map.setView([lat,lng],10);placeTargetMarker(lat,lng);
+            geoInput.value='';geoResults.style.display='none';
+            showPage('map-page');showToast('📍 '+item.display_name.split(',')[0]);
+          });
+          geoResults.appendChild(div);
+        });
+        geoResults.style.display='block';
+      }).catch(()=>{geoResults.style.display='none';});
+  },400);
+});
+document.addEventListener('click',e=>{if(!e.target.closest('#geo-search-wrap'))geoResults.style.display='none';});
+
+// ── SOUND (shared AudioContext) ──
+let actx=null;
+function playSound(type){
+  try{
+    if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==='suspended')actx.resume();
+    const ctx=actx,osc=ctx.createOscillator(),gain=ctx.createGain(),t=ctx.currentTime;
+    osc.connect(gain);gain.connect(ctx.destination);
+    if(type==='calamity'){osc.type='sawtooth';osc.frequency.setValueAtTime(80,t);osc.frequency.exponentialRampToValueAtTime(40,t+.8);gain.gain.setValueAtTime(.3,t);gain.gain.exponentialRampToValueAtTime(.01,t+.8);osc.start(t);osc.stop(t+.8);}
+    else if(type==='death'){osc.type='sine';osc.frequency.setValueAtTime(400,t);osc.frequency.exponentialRampToValueAtTime(100,t+.5);gain.gain.setValueAtTime(.15,t);gain.gain.exponentialRampToValueAtTime(.01,t+.5);osc.start(t);osc.stop(t+.5);}
+    else{osc.type='sine';osc.frequency.setValueAtTime(880,t);osc.frequency.exponentialRampToValueAtTime(1200,t+.1);gain.gain.setValueAtTime(.15,t);gain.gain.exponentialRampToValueAtTime(.01,t+.25);osc.start(t);osc.stop(t+.25);}
+  }catch(e){}
+}
+
+// ── POPUP / ICON ──
+function generatePopupContent(d){
+  let s='<b>'+getEmoji(d.type,d.typeDetail)+' '+esc(d.name)+'</b><br><span style="color:#64748b;font-size:11px;">'+esc(d.typeDetail)+' · '+esc(d.type)+'</span><br>';
+  s+='📅 '+esc(d.date)+' '+esc(d.time)+'<br>📍 '+(+d.lat).toFixed(4)+', '+(+d.lng).toFixed(4)+'<br>❤️ '+esc(d.health);
+  if(d.lifespan>0)s+=' · ⏳ '+esc(d.lifespan)+' '+esc(d.lifespanUnit);
+  if(d.type==='calamity')s+='<br>💥 Str:'+esc(d.strength)+' / R:'+esc(d.radius)+'km';
+  const u=safeUrl(d.quantumUrl);
+  if(u)s+='<br>🔮 <a href="'+esc(u)+'" target="_blank" rel="noopener" style="color:#16a34a;">Micius</a>';
+  return s;
+}
+function makeIcon(emoji){return L.divIcon({html:'<div class="emoji-marker-icon">'+emoji+'</div>',className:'custom-div-icon',iconSize:[32,32],iconAnchor:[16,16]});}
+
+// ── HISTORY ──
+const historyDiv=$('history');
+function historyHTML(d){
+  const hPct=clamp((d.health/1000)*100,0,100);
+  return getEmoji(d.type,d.typeDetail)+' <b>'+esc(d.name)+'</b><br><span style="color:var(--muted);font-size:11px;">'+esc(d.typeDetail)+' · '+(+d.lat).toFixed(3)+','+(+d.lng).toFixed(3)+' · ❤️'+esc(d.health)+'</span><div class="health-bar"><div class="health-fill" style="width:'+hPct+'%"></div></div>';
+}
+function findItemEl(id){return Array.from(historyDiv.children).find(e=>e.dataset.id===String(id));}
+function addHistoryItem(d){
+  if(findItemEl(d.id)){updateHistoryItem(d);return;}
+  const item=document.createElement('div');item.className='history-item';item.dataset.id=String(d.id);
+  const span=document.createElement('span');span.className='item-text';span.innerHTML=historyHTML(d);
+  span.addEventListener('click',()=>{map.setView([d.lat,d.lng],10);if(d.marker)d.marker.openPopup();showPage('map-page');});
+  const btnDiv=document.createElement('div');btnDiv.className='item-buttons';
+  const mk=(txt,cls,cb)=>{const b=document.createElement('button');b.textContent=txt;b.className='item-btn '+cls;b.addEventListener('click',e=>{e.stopPropagation();cb();});return b;};
+  btnDiv.appendChild(mk('↩️','ib-origin',()=>{d.lat=d.originLat;d.lng=d.originLng;if(d.marker){d.marker.setLatLng([d.lat,d.lng]);d.marker.setPopupContent(generatePopupContent(d));}updateHistoryItem(d);saveLS();}));
+  btnDiv.appendChild(mk('📋','ib-dup',()=>duplicateCreation(d)));
+  btnDiv.appendChild(mk('✏️','ib-edit',()=>fillFormWith(d)));
+  btnDiv.appendChild(mk('✖','ib-del',()=>deleteCreationById(d.id)));
+  item.appendChild(span);item.appendChild(btnDiv);historyDiv.prepend(item);
+}
+function updateHistoryItem(d){
+  const el=findItemEl(d.id);if(!el)return;
+  const span=el.querySelector('.item-text');if(span)span.innerHTML=historyHTML(d);
+}
+function fillFormWith(d){
+  $('target-date').value=d.date;$('target-time').value=d.time;$('object-name').value=d.name;
+  $('quantum-url').value=d.quantumUrl||'';$('lifespan').value=d.lifespan||0;
+  $('lifespan-unit').value=d.lifespanUnit||'seconds';$('health').value=d.health||100;
+  creationTypeSelect.value=d.type;creationTypeSelect.dispatchEvent(new Event('change'));
+  if(d.type==='object')objectTypeSelect.value=d.typeDetail;
+  else if(d.type==='organism')organismTypeSelect.value=d.typeDetail;
+  else{calamityTypeSelect.value=d.typeDetail;$('calamity-strength').value=d.strength||50;$('calamity-radius').value=d.radius||10;}
+  placeTargetMarker(d.lat,d.lng);showPage('create');showToast('✏️ Loaded "'+d.name+'"');
+}
+
+// ── MOVEMENT ──
+function startOrganismMovement(org){
+  if(!movementEnabled||org.type!=='organism')return;
+  if(org.intervalId)clearInterval(org.intervalId);
+  org.intervalId=setInterval(()=>{
+    try{
+      if(!movementEnabled||!org.marker)return;
+      const cur=org.marker.getLatLng();
+      let nLat=cur.lat+(Math.random()-.5)*0.002,nLng=cur.lng+(Math.random()-.5)*0.002;
+      const dd=dist(org.originLat,org.originLng,nLat,nLng);
+      if(dd>movementRadius){nLat+=(org.originLat-nLat)*0.3;nLng+=(org.originLng-nLng)*0.3;}
+      nLat=clamp(nLat,-85,85);
+      org.marker.setLatLng([nLat,nLng]);org.lat=nLat;org.lng=nLng;
+      if(org.lifespanUnit==='moves'&&org.lifespan>0){
+        org.moveCount=(org.moveCount||0)+1;
+        if(org.moveCount>=org.lifespan){deleteCreationById(org.id,'lifespan');return;}
+      }
+      org.marker.setPopupContent(generatePopupContent(org));updateHistoryItem(org);
+    }catch(e){try{AI.onError('movement: '+e.message);}catch(_){}}
+  },movementSpeed);
+}
+function stopAllMovement(){creationMarkers.forEach(d=>{if(d.intervalId){clearInterval(d.intervalId);d.intervalId=null;}});}
+function restartAllMovement(){if(!movementEnabled)return;creationMarkers.forEach(d=>{if(d.type==='organism'){if(d.intervalId)clearInterval(d.intervalId);startOrganismMovement(d);}});}
+
+// ── DELETE ──
+function deleteCreationById(id,reason=''){
+  const idx=creationMarkers.findIndex(c=>String(c.id)===String(id));
+  if(idx===-1)return;
+  const d=creationMarkers[idx];
+  if(d.intervalId){clearInterval(d.intervalId);d.intervalId=null;}
+  try{if(d.marker)markerCluster.removeLayer(d.marker);}catch(e){}
+  creationMarkers.splice(idx,1);
+  const el=findItemEl(id);if(el)el.remove();
+  if(AR.selected&&AR.selected.id===d.id)AR.select(null);
+  saveLS();updateStats();
+  if(reason){logEvent('💀 '+d.name+' removed ('+reason+')','log-death');if(reason!=='dissipated')playSound('death');}
+}
+
+// ── CALAMITY ──
+function applyCalamity(cal){
+  const r=(cal.radius||10)*1000,kill=[];
+  creationMarkers.slice().forEach(o=>{
+    if(o.id===cal.id)return;
+    if(dist(cal.lat,cal.lng,o.lat,o.lng)<=r){
+      o.health-=(cal.strength||50);
+      if(o.health<=0)kill.push(o.id);else{if(o.marker)o.marker.setPopupContent(generatePopupContent(o));updateHistoryItem(o);}
+    }
+  });
+  kill.forEach(id=>deleteCreationById(id,'calamity'));
+  logEvent('💥 '+cal.name+' struck! '+kill.length+' destroyed.','log-calamity');
+}
+
+// ── REGISTER ──
+function attachMarker(nd){
+  const marker=L.marker([nd.lat,nd.lng],{icon:makeIcon(getEmoji(nd.type,nd.typeDetail)),draggable:true});
+  nd.marker=marker;
+  nd.popupContent=generatePopupContent(nd);
+  marker.bindPopup(nd.popupContent);
+  marker.on('dragend',()=>onMarkerDrag(marker,nd));
+  if(markersVisible)markerCluster.addLayer(marker);
+}
+function registerCreation(nd,silent){
+  attachMarker(nd);
+  creationMarkers.push(nd);
+  if(nd.type==='organism'&&movementEnabled)startOrganismMovement(nd);
+  addHistoryItem(nd);
+  if(!silent){saveLS();updateStats();}
+}
+function onMarkerDrag(marker,d){
+  const p=marker.getLatLng();
+  d.lat=p.lat;d.lng=p.lng;d.originLat=p.lat;d.originLng=p.lng;
+  marker.setPopupContent(generatePopupContent(d));updateHistoryItem(d);saveLS();
+}
+function countOrganisms(){return creationMarkers.filter(c=>c.type==='organism').length;}
+
+function createOffspring(parent,lat,lng){
+  if(countOrganisms()>=maxPopulation)return;
+  const nd={
+    id:Date.now()+Math.random(),type:'organism',name:parent.name.replace(/( Jr\.)+$/,'')+' Jr.',typeDetail:parent.typeDetail,
+    lat,lng,originLat:lat,originLng:lng,date:parent.date,time:parent.time,quantumUrl:parent.quantumUrl,
+    lifespan:parent.lifespan,lifespanUnit:parent.lifespanUnit,health:100,birthTime:Date.now(),moveCount:0,intervalId:null
+  };
+  registerCreation(nd);
+  logEvent('🧬 '+nd.name+' born!','log-repro');playSound('create');
+}
+function duplicateCreation(orig){
+  const ll=orig.marker?orig.marker.getLatLng():{lat:orig.lat,lng:orig.lng};
+  const nd={id:Date.now()+Math.random(),type:orig.type,name:orig.name+' (copy)',typeDetail:orig.typeDetail,lat:ll.lat,lng:ll.lng,originLat:ll.lat,originLng:ll.lng,date:orig.date,time:orig.time,quantumUrl:orig.quantumUrl,lifespan:orig.lifespan,lifespanUnit:orig.lifespanUnit,health:orig.health,strength:orig.strength,radius:orig.radius,birthTime:Date.now(),moveCount:0,intervalId:null};
+  registerCreation(nd);showToast('📋 Duplicated "'+nd.name+'"');
+}
+
+// ── ECOLOGY ──
+function isPredator(t){return['Dragon','Animal','Mythical Beast','Alien','Human','Superhuman','Cyborg','Demon'].includes(t);}
+function ecoTick(){
+  if(!ecologyEnabled)return;
+  const now=Date.now();
+  creationMarkers.filter(d=>d.lifespan>0&&d.lifespanUnit==='seconds'&&(now-d.birthTime)/1000>=d.lifespan).forEach(d=>deleteCreationById(d.id,'lifespan'));
+  const orgs=creationMarkers.filter(d=>d.type==='organism');
+  const dead=new Set();
+  for(let i=0;i<orgs.length;i++)for(let j=i+1;j<orgs.length;j++){
+    const a=orgs[i],b=orgs[j];
+    if(dead.has(a.id)||dead.has(b.id))continue;
+    if(dist(a.lat,a.lng,b.lat,b.lng)<20000){
+      const ap=isPredator(a.typeDetail),bp=isPredator(b.typeDetail);
+      if(ap&&!bp){b.health-=10;if(b.health<=0)dead.add(b.id);}
+      else if(bp&&!ap){a.health-=10;if(a.health<=0)dead.add(a.id);}
+    }
+  }
+  dead.forEach(id=>deleteCreationById(id,'predation'));
+  if(reproductionEnabled){
+    const fit=creationMarkers.filter(d=>d.type==='organism'&&d.health>50);
+    outer:for(let i=0;i<fit.length;i++)for(let j=i+1;j<fit.length;j++){
+      if(countOrganisms()>=maxPopulation)break outer;
+      const a=fit[i],b=fit[j];
+      if(a.typeDetail!==b.typeDetail)continue;
+      if(dist(a.lat,a.lng,b.lat,b.lng)<reproductionRange&&Math.random()<reproductionRate){
+        createOffspring(a,clamp((a.lat+b.lat)/2+(Math.random()-.5)*0.01,-85,85),(a.lng+b.lng)/2+(Math.random()-.5)*0.01);
+      }
+    }
+  }
+  updateStats();
+}
+function startEcologyInterval(){
+  if(ecoIntervalId)clearInterval(ecoIntervalId);
+  ecoIntervalId=setInterval(()=>{
+    try{ecoTick();}catch(e){try{AI.onError('ecology: '+e.message);}catch(_){}}
+  },ecoIntervalTime);
+}
+
+// ── STATS ──
+function updateStats(){
+  $('stat-total').textContent=creationMarkers.length;
+  $('stat-objects').textContent=creationMarkers.filter(c=>c.type==='object').length;
+  $('stat-organisms').textContent=countOrganisms();
+  $('stat-calamities').textContent=creationMarkers.filter(c=>c.type==='calamity').length;
+}
+
+// ── STORAGE ──
+function serialize(c){
+  return{id:c.id,type:c.type,name:c.name,typeDetail:c.typeDetail,lat:c.lat,lng:c.lng,originLat:c.originLat,originLng:c.originLng,date:c.date,time:c.time,quantumUrl:c.quantumUrl,lifespan:c.lifespan,lifespanUnit:c.lifespanUnit,health:c.health,strength:c.strength,radius:c.radius,birthTime:c.birthTime};
+}
+function saveLS(){try{localStorage.setItem('creations_v4',JSON.stringify(creationMarkers.map(serialize)));}catch(e){}}
+function normalize(item,newId){
+  if(!item||typeof item!=='object')return null;
+  const lat=clamp(parseFloat(item.lat),-85,85),lng=parseFloat(item.lng);
+  if(!isFinite(lat)||!isFinite(lng)||!item.type||!item.typeDetail)return null;
+  if(!['object','organism','calamity'].includes(item.type))return null;
+  return{
+    id:newId?Date.now()+Math.random():(item.id||Date.now()+Math.random()),
+    type:item.type,name:String(item.name||'Unnamed').slice(0,60),typeDetail:String(item.typeDetail),
+    lat,lng,originLat:isFinite(+item.originLat)?+item.originLat:lat,originLng:isFinite(+item.originLng)?+item.originLng:lng,
+    date:item.date||'',time:item.time||'',quantumUrl:item.quantumUrl||null,
+    lifespan:parseInt(item.lifespan)||0,lifespanUnit:item.lifespanUnit==='moves'?'moves':'seconds',
+    health:parseInt(item.health)||100,strength:item.strength,radius:item.radius,
+    birthTime:item.birthTime||Date.now(),moveCount:0,intervalId:null
+  };
+}
+function loadLS(){
+  try{
+    const data=JSON.parse(localStorage.getItem('creations_v4')||'[]');
+    if(!Array.isArray(data))return;
+    data.forEach(it=>{const nd=normalize(it,false);if(nd)registerCreation(nd,true);});
+    updateStats();
+  }catch(e){console.warn('Load error:',e);}
+}
+
+// ── CREATE ──
+$('create-button').addEventListener('click',()=>{
+  const date=$('target-date').value,time=$('target-time').value,name=$('object-name').value.trim();
+  let quantumUrl=$('quantum-url').value.trim();
+  const ctype=creationTypeSelect.value,typeDetail=currentTypeDetail();
+  if(!date||!time||selectedLat===null||!name){showToast('⚠️ Fill all fields & set location!','error');return;}
+  if(quantumUrl&&!safeUrl(quantumUrl))quantumUrl='';
+  let lat=selectedLat,lng=selectedLng;
+  if(quantumUrl){lat+=(Math.random()-.5)*0.0001;lng+=(Math.random()-.5)*0.0001;}
+  if($('snap-grid').checked){lat=Math.round(lat*1000)/1000;lng=Math.round(lng*1000)/1000;}
+  const nd=makeCreation(ctype,typeDetail,name,lat,lng,date,time,quantumUrl||null);
+  finishCreate(nd);
+});
+function makeCreation(ctype,typeDetail,name,lat,lng,date,time,quantumUrl){
+  const nd={
+    id:Date.now()+Math.random(),type:ctype,name,typeDetail,lat,lng,originLat:lat,originLng:lng,date,time,quantumUrl,
+    intervalId:null,lifespan:parseInt($('lifespan').value)||0,lifespanUnit:$('lifespan-unit').value,
+    health:clamp(parseInt($('health').value)||100,1,1000),birthTime:Date.now(),moveCount:0
+  };
+  if(ctype==='calamity'){nd.strength=parseInt($('calamity-strength').value)||50;nd.radius=parseInt($('calamity-radius').value)||10;}
+  return nd;
+}
+function finishCreate(nd){
+  registerCreation(nd);
+  try{AI.userActed();}catch(e){}
+  const emoji=getEmoji(nd.type,nd.typeDetail);
+  if(nd.type==='calamity'){playSound('calamity');setTimeout(()=>applyCalamity(nd),100);}else playSound('create');
+  showToast(emoji+' "'+nd.name+'" created!');
+  logEvent(emoji+' Created: '+nd.name+' ('+nd.typeDetail+')',nd.type==='calamity'?'log-calamity':'log-create');
+}
+
+// ── RANDOM ──
+const NAMES=["Genesis","Nova","Quantum","Omega","Alpha","Elysium","Void","Spark","Echo","Neo","Zephyr","Titan","Aether","Cosmos","Pixel","Flux","Storm","Blaze","Shadow","Nyx"];
+const rname=()=>NAMES[Math.floor(Math.random()*NAMES.length)]+Math.floor(Math.random()*999);
+$('random-btn').addEventListener('click',()=>{
+  $('object-name').value=rname();
+  $('target-date').value=localDate(new Date(Date.now()-Math.random()*30*864e5));
+  $('target-time').value=pad2(Math.floor(Math.random()*24))+':'+pad2(Math.floor(Math.random()*60));
+  const ctype=creationTypeSelect.value;
+  const sel=ctype==='object'?objectTypeSelect:ctype==='organism'?organismTypeSelect:calamityTypeSelect;
+  const opts=Array.from(sel.options);sel.value=opts[Math.floor(Math.random()*opts.length)].value;
+  const b=map.getBounds();
+  placeTargetMarker(b.getSouth()+(b.getNorth()-b.getSouth())*Math.random(),b.getWest()+(b.getEast()-b.getWest())*Math.random());
+  showToast('🎲 Randomized!');
+});
+$('random-name-btn').addEventListener('click',()=>{$('object-name').value=rname();});
+
+$('reset-form').addEventListener('click',()=>{
+  $('target-date').value='';$('target-time').value='';$('object-name').value='';
+  $('quantum-url').value='https://micius.quantum/';$('lifespan').value='0';$('health').value='100';
+  creationTypeSelect.value='object';creationTypeSelect.dispatchEvent(new Event('change'));
+  if(targetMarker){map.removeLayer(targetMarker);targetMarker=null;}
+  clearCoords();showToast('🔄 Form reset');
+});
+
+// ── MAP CONTROLS ──
+const toggleMoveBtn=$('toggle-move-btn');
+toggleMoveBtn.addEventListener('click',()=>{
+  movementEnabled=!movementEnabled;
+  toggleMoveBtn.textContent=movementEnabled?'⏸️ Pause':'▶️ Resume';
+  if(movementEnabled)restartAllMovement();else stopAllMovement();
+  showToast(movementEnabled?'▶️ Movement resumed':'⏸️ Movement paused');
+});
+const visBtn=$('toggle-visibility-btn');
+visBtn.addEventListener('click',()=>{
+  markersVisible=!markersVisible;
+  if(markersVisible){creationMarkers.forEach(c=>{if(c.marker&&!markerCluster.hasLayer(c.marker))markerCluster.addLayer(c.marker);});visBtn.textContent='👁️ Hide';}
+  else{creationMarkers.forEach(c=>{try{if(c.marker)markerCluster.removeLayer(c.marker);}catch(e){}});visBtn.textContent='👁️ Show';}
+});
+$('center-all-btn').addEventListener('click',()=>{
+  if(!creationMarkers.length){showToast('No markers yet','warn');return;}
+  map.invalidateSize();
+  map.fitBounds(L.latLngBounds(creationMarkers.map(c=>[c.lat,c.lng])),{padding:[30,30],maxZoom:16});
+});
+
+// ── FILTER ──
+$('history-filter').addEventListener('input',function(){
+  const t=this.value.toLowerCase();
+  Array.from(historyDiv.children).forEach(item=>{item.style.display=item.querySelector('.item-text').textContent.toLowerCase().includes(t)?'':'none';});
+});
+$('clear-filter').addEventListener('click',()=>{$('history-filter').value='';Array.from(historyDiv.children).forEach(i=>i.style.display='');});
+
+// ── SLIDERS ──
+$('move-speed').addEventListener('input',e=>{movementSpeed=+e.target.value;$('speed-value').textContent=movementSpeed+' ms';stopAllMovement();restartAllMovement();});
+$('move-radius').addEventListener('input',e=>{movementRadius=+e.target.value*1000;$('radius-value').textContent=e.target.value+' km';});
+$('eco-interval').addEventListener('input',e=>{ecoIntervalTime=+e.target.value*1000;$('eco-value').textContent=e.target.value+' s';startEcologyInterval();});
+$('enable-ecology').addEventListener('change',e=>{ecologyEnabled=e.target.checked;});
+$('enable-reproduction').addEventListener('change',e=>{reproductionEnabled=e.target.checked;});
+$('repro-rate').addEventListener('input',e=>{reproductionRate=+e.target.value;$('repro-rate-value').textContent=(+e.target.value).toFixed(2);});
+$('repro-range').addEventListener('input',e=>{reproductionRange=+e.target.value*1000;$('repro-range-value').textContent=e.target.value+' km';});
+$('max-pop').addEventListener('input',e=>{maxPopulation=+e.target.value;$('max-pop-value').textContent=e.target.value;});
+
+// ── CULL / CLEAR ──
+$('cull-btn').addEventListener('click',()=>{
+  let excess=countOrganisms()-maxPopulation;
+  if(excess<=0){showToast('✅ Population within limit','warn');return;}
+  const n=excess;
+  while(excess-->0){const o=creationMarkers.find(d=>d.type==='organism');if(o)deleteCreationById(o.id,'cull');}
+  showToast('✂️ Culled '+n+' organisms');
+});
+function doDeleteAll(){
+  stopAllMovement();
+  creationMarkers.forEach(d=>{try{if(d.marker)markerCluster.removeLayer(d.marker);}catch(e){}});
+  creationMarkers=[];historyDiv.innerHTML='';
+  AR.select(null);
+  if(targetMarker){map.removeLayer(targetMarker);targetMarker=null;}
+  clearCoords();
+  try{localStorage.removeItem('creations_v4');}catch(e){}
+  try{AI.userCleared();}catch(e){}
+  updateStats();
+}
+function confirmDeleteAll(){if(!confirm('Delete ALL creations?'))return;doDeleteAll();showToast('🗑️ All cleared');logEvent('🗑️ All creations deleted.','log-death');}
+$('clear-markers').addEventListener('click',confirmDeleteAll);
+$('clear-all-btn').addEventListener('click',confirmDeleteAll);
+$('reset-localstorage-btn').addEventListener('click',()=>{
+  if(!confirm('Clear all saved data?'))return;
+  try{localStorage.clear();}catch(e){}
+  showToast('🔄 Local storage cleared');
+});
+
+// ── EXPORT / IMPORT ──
+$('export-btn').addEventListener('click',()=>{
+  const data=creationMarkers.map(serialize);
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download='creations_'+localDate()+'.json';
+  document.body.appendChild(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+  showToast('💾 Exported '+data.length+' creations');
+});
+$('import-btn').addEventListener('click',()=>$('import-file').click());
+$('import-file').addEventListener('change',e=>{
+  const file=e.target.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const imported=JSON.parse(ev.target.result);
+      if(!Array.isArray(imported))throw new Error('Not an array');
+      const merge=$('merge-checkbox').checked;
+      if(!merge)doDeleteAll();
+      let n=0;
+      imported.forEach(it=>{const nd=normalize(it,merge);if(nd){registerCreation(nd,true);n++;}});
+      saveLS();updateStats();showToast('📂 Imported '+n+' creations');
+    }catch(err){showToast('❌ Invalid JSON file','error');}
+    e.target.value='';
+  };
+  reader.onerror=()=>showToast('❌ Could not read file','error');
+  reader.readAsText(file);
+});
+
+/* ════════════════════════════════════════════
+   AUGMENTED REALITY ENGINE
+   ════════════════════════════════════════════ */
+const AR=(function(){
+  const video=$('ar-video'),canvas=$('ar-canvas'),ctx=canvas.getContext('2d'),page=$('ar-page'),info=$('ar-info');
+  const S={
+    running:false,paused:false,stream:null,raf:0,camera:false,
+    heading:0,pitch:0,roll:0,headingOffset:0,
+    hasCompass:false,hasTilt:false,lastOrient:0,absSeen:false,
+    userLat:null,userLng:null,gpsAcc:null,watchId:null,gpsLive:false,
+    hFov:62,rangeM:500,hits:[],selected:null,
+    drag:null,dragMoved:false,manualYaw:0,manualPitch:0,
+    w:0,h:0,dpr:1
+  };
+
+  const rangeFromSlider=v=>Math.round(20*Math.pow(10,(v/100)*5.7));
+  const fmtDist=m=>m<1000?Math.round(m)+' m':m<100000?(m/1000).toFixed(1)+' km':Math.round(m/1000)+' km';
+  function updateRange(){S.rangeM=rangeFromSlider(+$('ar-range').value);$('ar-range-val').textContent=fmtDist(S.rangeM);}
+  $('ar-range').addEventListener('input',updateRange);updateRange();
+
+  function size(){
+    const r=page.getBoundingClientRect();
+    S.dpr=Math.min(window.devicePixelRatio||1,2);
+    S.w=Math.max(1,Math.round(r.width));S.h=Math.max(1,Math.round(r.height));
+    canvas.width=S.w*S.dpr;canvas.height=S.h*S.dpr;
+    ctx.setTransform(S.dpr,0,0,S.dpr,0,0);
+  }
+  window.layoutAR=function(){
+    const top=$('tabs').getBoundingClientRect().bottom;
+    const bottom=$('bottom-nav').getBoundingClientRect().height;
+    page.style.top=top+'px';page.style.bottom=bottom+'px';
+    requestAnimationFrame(size);
+  };
+  window.addEventListener('resize',()=>{if(currentPage==='ar-page')window.layoutAR();});
+  window.addEventListener('orientationchange',()=>setTimeout(()=>{if(currentPage==='ar-page')window.layoutAR();},300));
+
+  function userPos(){
+    if(S.userLat!==null)return{lat:S.userLat,lng:S.userLng};
+    if(selectedLat!==null)return{lat:selectedLat,lng:selectedLng};
+    const c=map.getCenter();return{lat:c.lat,lng:c.lng};
+  }
+  function startGPS(){
+    if(!navigator.geolocation||S.watchId!==null)return;
+    S.watchId=navigator.geolocation.watchPosition(p=>{
+      S.userLat=p.coords.latitude;S.userLng=p.coords.longitude;S.gpsAcc=p.coords.accuracy;S.gpsLive=true;
+      $('hud-gps').textContent='📡 ±'+Math.round(p.coords.accuracy)+' m';
+    },err=>{
+      S.gpsLive=false;$('hud-gps').textContent='📡 '+(err.code===1?'denied':'no fix');
+    },{enableHighAccuracy:true,maximumAge:2000,timeout:20000});
+  }
+  function stopGPS(){if(S.watchId!==null){navigator.geolocation.clearWatch(S.watchId);S.watchId=null;}}
+
+  // orientation — camera direction is computed from the full rotation so it is
+  // independent of screen rotation and correct when the phone is held upright
+  const screenAngle=()=>(screen.orientation&&typeof screen.orientation.angle==='number')?screen.orientation.angle:(window.orientation||0);
+  function smoothAngle(prev,next,k){let d=((next-prev+540)%360)-180;return(prev+d*k+360)%360;}
+  function onOrient(e){
+    if(e.beta===null||e.beta===undefined)return;
+    const isAbs=e.type==='deviceorientationabsolute';
+    if(isAbs)S.absSeen=true;
+    const beta=toRad(e.beta),gamma=toRad(e.gamma||0);
+    const p=toDeg(Math.asin(clamp(-Math.cos(beta)*Math.cos(gamma),-1,1)));
+    S.hasTilt=true;S.lastOrient=Date.now();
+    S.pitch=S.pitch*.7+clamp(p,-89,89)*.3;
+    let hd=null;
+    if(typeof e.webkitCompassHeading==='number'&&isFinite(e.webkitCompassHeading)){
+      const sa=screenAngle();
+      hd=(e.webkitCompassHeading+(sa===180?180:sa===90?-90:(sa===270||sa===-90)?90:0)+360)%360;
+    }else if(e.alpha!==null&&e.alpha!==undefined&&(isAbs||e.absolute===true||(!S.absSeen&&!S.hasCompass))){
+      const a=toRad(e.alpha);
+      const vx=-Math.cos(a)*Math.sin(gamma)-Math.sin(a)*Math.sin(beta)*Math.cos(gamma);
+      const vy=-Math.sin(a)*Math.sin(gamma)+Math.cos(a)*Math.sin(beta)*Math.cos(gamma);
+      hd=Math.hypot(vx,vy)>0.15?(toDeg(Math.atan2(vx,vy))+360)%360:(360-e.alpha)%360;
+    }
+    if(hd!==null){
+      S.heading=S.hasCompass?smoothAngle(S.heading,hd,.25):hd;S.hasCompass=true;
+    }
+  }
+  let orientBound=false;
+  async function startSensors(){
+    try{
+      if(typeof DeviceOrientationEvent!=='undefined'&&typeof DeviceOrientationEvent.requestPermission==='function'){
+        const r=await DeviceOrientationEvent.requestPermission();
+        if(r!=='granted'){showToast('Motion access denied — drag to look','warn');return;}
+      }
+    }catch(e){showToast('Motion permission error — drag to look','warn');return;}
+    if(!orientBound){
+      window.addEventListener('deviceorientationabsolute',onOrient,true);
+      window.addEventListener('deviceorientation',onOrient,true);
+      orientBound=true;
+    }
+  }
+  function stopSensors(){
+    if(!orientBound)return;
+    window.removeEventListener('deviceorientationabsolute',onOrient,true);
+    window.removeEventListener('deviceorientation',onOrient,true);
+    orientBound=false;S.hasCompass=false;S.hasTilt=false;S.absSeen=false;
+  }
+
+  // camera
+  async function startCamera(){
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){throw new Error('Camera API unavailable (HTTPS required)');}
+    try{
+      S.stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1280},height:{ideal:720}},audio:false});
+    }catch(e){
+      S.stream=await navigator.mediaDevices.getUserMedia({video:true,audio:false});
+    }
+    video.srcObject=S.stream;
+    try{await video.play();}catch(e){}
+    S.camera=true;
+    const track=S.stream.getVideoTracks()[0];
+    try{const st=track.getSettings();if(st.width&&st.height){const ar=Math.max(st.width,st.height)/Math.min(st.width,st.height);S.hFov=S.w>S.h?62:Math.max(48,Math.min(70,62/ar*1.4));}}catch(e){}
+  }
+  function stopCamera(){
+    if(S.stream){S.stream.getTracks().forEach(t=>t.stop());S.stream=null;}
+    video.srcObject=null;S.camera=false;
+  }
+
+  async function start(withCamera){
+    $('ar-start').style.display='none';
+    window.layoutAR();
+    S.running=true;S.paused=false;
+    // Motion permission must be requested inside the user gesture (iOS), i.e. before any await
+    const sensorsReady=startSensors();
+    startGPS();
+    if(withCamera){
+      try{await startCamera();}
+      catch(e){showToast('📷 '+(e.message||'Camera blocked')+' — demo view','warn');}
+    }
+    await sensorsReady;
+    S.manualYaw=0;S.manualPitch=0;
+    cancelAnimationFrame(S.raf);
+    S.raf=requestAnimationFrame(loop);
+  }
+  function stop(){
+    S.running=false;cancelAnimationFrame(S.raf);
+    stopCamera();stopGPS();stopSensors();
+    S.userLat=null;S.userLng=null;S.gpsLive=false;
+    select(null);
+    $('ar-start').style.display='flex';
+    ctx.clearRect(0,0,S.w,S.h);
+  }
+  function pause(){
+    if(!S.running)return;S.paused=true;cancelAnimationFrame(S.raf);
+    if(S.stream)S.stream.getTracks().forEach(t=>{t.enabled=false;});
+  }
+  function resume(){
+    if(!S.running)return;S.paused=false;
+    if(S.stream)S.stream.getTracks().forEach(t=>{t.enabled=true;});
+    if(video.paused&&S.stream)video.play().catch(()=>{});
+    cancelAnimationFrame(S.raf);S.raf=requestAnimationFrame(loop);
+  }
+
+  // projection
+  function bearingTo(lat1,lng1,lat2,lng2){
+    const φ1=toRad(lat1),φ2=toRad(lat2),dλ=toRad(lng2-lng1);
+    const y=Math.sin(dλ)*Math.cos(φ2),x=Math.cos(φ1)*Math.sin(φ2)-Math.sin(φ1)*Math.cos(φ2)*Math.cos(dλ);
+    return(toDeg(Math.atan2(y,x))+360)%360;
+  }
+  const wrap180=a=>((a+540)%360)-180;
+  function viewYaw(){return(S.hasCompass?S.heading:0)+S.headingOffset+S.manualYaw;}
+  function viewPitch(){return(S.hasTilt?S.pitch:0)+S.manualPitch;}
+
+  function project(d,up){
+    const dm=dist(up.lat,up.lng,d.lat,d.lng);
+    const brg=bearingTo(up.lat,up.lng,d.lat,d.lng);
+    const rel=wrap180(brg-viewYaw());
+    const alt=AR_ALT[d.typeDetail]!==undefined?AR_ALT[d.typeDetail]:(d.type==='calamity'?5:0);
+    const eff=Math.max(dm,5);
+    const elev=toDeg(Math.atan2(alt-1.6,eff));
+    const vFov=S.hFov*S.h/S.w;
+    const rp=elev-viewPitch();
+    return{d,dm,brg,rel,elev,rp,vFov,
+      x:S.w/2+(rel/S.hFov)*S.w,
+      y:S.h/2-(rp/vFov)*S.h};
+  }
+
+  function drawReticle(){
+    ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=1;
+    const cx=S.w/2,cy=S.h/2;
+    ctx.beginPath();ctx.moveTo(cx-10,cy);ctx.lineTo(cx+10,cy);ctx.moveTo(cx,cy-10);ctx.lineTo(cx,cy+10);ctx.stroke();
+    const vFov=S.hFov*S.h/S.w,hy=S.h/2+(viewPitch()/vFov)*S.h;
+    if(hy>0&&hy<S.h){
+      ctx.setLineDash([8,8]);ctx.strokeStyle='rgba(34,197,94,.45)';
+      ctx.beginPath();ctx.moveTo(0,hy);ctx.lineTo(S.w,hy);ctx.stroke();ctx.setLineDash([]);
+    }
+    const yaw=viewYaw(),names={0:'N',45:'NE',90:'E',135:'SE',180:'S',225:'SW',270:'W',315:'NW'};
+    ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.textBaseline='top';
+    for(let a=0;a<360;a+=15){
+      const rel=wrap180(a-yaw);if(Math.abs(rel)>S.hFov/2)continue;
+      const x=S.w/2+(rel/S.hFov)*S.w,big=a%45===0;
+      ctx.strokeStyle='rgba(255,255,255,.6)';
+      ctx.beginPath();ctx.moveTo(x,44);ctx.lineTo(x,big?58:52);ctx.stroke();
+      if(big)ctx.fillText(names[a],x,60);
+    }
+  }
+
+  function roundRect(x,y,w,h,r){
+    ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();
+  }
+
+  function drawItem(p,t){
+    const d=p.d,emoji=getEmoji(d.type,d.typeDetail);
+    const near=clamp(1-Math.log10(Math.max(p.dm,10)/10)/Math.log10(Math.max(S.rangeM,100)/10),0,1);
+    let sz=26+near*64;
+    const bob=Math.sin(t/600+(d.birthTime%1000))*3;
+    const x=p.x,y=p.y+bob;
+    const sel=S.selected&&S.selected.id===d.id;
+    if(d.type==='calamity'){
+      const rm=(d.radius||10)*1000;
+      const ang=toDeg(Math.atan2(rm,Math.max(p.dm,10)));
+      const rpx=clamp((ang/S.hFov)*S.w,sz*.8,S.w*1.5);
+      ctx.save();
+      ctx.strokeStyle='rgba(239,68,68,.8)';ctx.fillStyle='rgba(239,68,68,.12)';ctx.lineWidth=2;
+      ctx.setLineDash([8,6]);ctx.lineDashOffset=-t/60;
+      ctx.beginPath();ctx.ellipse(x,y+sz*.4,rpx,rpx*.28,0,0,Math.PI*2);ctx.fill();ctx.stroke();
+      ctx.restore();
+    }
+    if(AR_ALT[d.typeDetail]>0){
+      const vFov=p.vFov,gy=S.h/2-((toDeg(Math.atan2(-1.6,Math.max(p.dm,5)))-viewPitch())/vFov)*S.h;
+      ctx.strokeStyle='rgba(255,255,255,.25)';ctx.lineWidth=1;ctx.setLineDash([3,4]);
+      ctx.beginPath();ctx.moveTo(x,y+sz/2);ctx.lineTo(x,clamp(gy,0,S.h));ctx.stroke();ctx.setLineDash([]);
+    }
+    const g=ctx.createRadialGradient(x,y,2,x,y,sz*.95);
+    const col=d.type==='calamity'?'239,68,68':d.type==='organism'?'34,197,94':'59,130,246';
+    g.addColorStop(0,'rgba('+col+',.45)');g.addColorStop(1,'rgba('+col+',0)');
+    ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,sz*.95,0,Math.PI*2);ctx.fill();
+    if(sel){ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.arc(x,y,sz*.75,0,Math.PI*2);ctx.stroke();}
+    ctx.font=Math.round(sz)+'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+    ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';
+    ctx.fillText(emoji,x,y);
+    const label=d.name+' · '+fmtDist(p.dm);
+    ctx.font='bold 11px -apple-system,Segoe UI,sans-serif';
+    const tw=Math.min(ctx.measureText(label).width+14,S.w*.7),lx=x-tw/2,ly=y+sz*.62;
+    ctx.fillStyle='rgba(15,23,42,.78)';roundRect(lx,ly,tw,18,9);ctx.fill();
+    ctx.fillStyle='#fff';ctx.textBaseline='middle';
+    let txt=label;while(txt.length>4&&ctx.measureText(txt).width>tw-10)txt=txt.slice(0,-2);
+    if(txt!==label)txt+='…';
+    ctx.fillText(txt,x,ly+9.5);
+    const hp=clamp(d.health/100,0,1);
+    ctx.fillStyle='rgba(255,255,255,.25)';ctx.fillRect(x-20,ly+21,40,3);
+    ctx.fillStyle=hp>.5?'#22c55e':hp>.25?'#f59e0b':'#ef4444';ctx.fillRect(x-20,ly+21,40*hp,3);
+    S.hits.push({d,x,y,r:Math.max(sz*.7,24)});
+  }
+
+  function drawEdgeArrow(p){
+    const cx=S.w/2,cy=S.h/2;
+    let dx=p.x-cx,dy=p.y-cy;
+    if(p.rel>90||p.rel<-90)dx=p.rel>0?1:-1;
+    const ang=Math.atan2(dy,dx),m=26;
+    const ex=clamp(cx+Math.cos(ang)*S.w,m,S.w-m),ey=clamp(cy+Math.sin(ang)*S.h,70,Math.max(71,S.h-m-90));
+    ctx.save();ctx.translate(ex,ey);ctx.rotate(ang);
+    ctx.fillStyle='rgba(34,197,94,.85)';
+    ctx.beginPath();ctx.moveTo(12,0);ctx.lineTo(-8,-9);ctx.lineTo(-8,9);ctx.closePath();ctx.fill();
+    ctx.restore();
+    ctx.font='14px "Apple Color Emoji","Segoe UI Emoji",sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(getEmoji(p.d.type,p.d.typeDetail),clamp(ex-Math.cos(ang)*20,12,S.w-12),clamp(ey-Math.sin(ang)*20,12,S.h-12));
+  }
+
+  function loop(t){
+    if(!S.running||S.paused)return;
+    S.raf=requestAnimationFrame(loop);
+    try{
+      if(!S.w||!S.h){size();return;}
+      ctx.clearRect(0,0,S.w,S.h);
+      if(!S.camera){
+        const vFov=S.hFov*S.h/S.w,hy=S.h/2+(viewPitch()/vFov)*S.h;
+        const gg=ctx.createLinearGradient(0,0,0,S.h);const k=clamp(hy/S.h,.01,.98);
+        gg.addColorStop(0,'#0b1d3a');gg.addColorStop(k,'#1e3a5f');gg.addColorStop(Math.min(k+.001,1),'#14301f');gg.addColorStop(1,'#07140c');
+        ctx.fillStyle=gg;ctx.fillRect(0,0,S.w,S.h);
+      }
+      drawReticle();
+      const up=userPos();
+      const projected=[];
+      for(const d of creationMarkers){
+        const p=project(d,up);
+        if(p.dm>S.rangeM)continue;
+        projected.push(p);
+      }
+      projected.sort((a,b)=>b.dm-a.dm);
+      S.hits=[];let inView=0;
+      for(const p of projected){
+        const onScreen=Math.abs(p.rel)<S.hFov/2+6&&p.y>-40&&p.y<S.h+40;
+        if(onScreen){drawItem(p,t);inView++;}
+        else drawEdgeArrow(p);
+      }
+      $('hud-heading').textContent='🧭 '+Math.round((viewYaw()+360)%360)+'°'+(S.hasCompass?'':' (manual)');
+      if(!S.gpsLive&&S.watchId!==null)$('hud-gps').textContent='📡 waiting…';
+      if(S.userLat===null&&S.watchId===null)$('hud-gps').textContent='📍 map center';
+      $('hud-count').textContent=inView+' in view · '+projected.length+' in range';
+      if(S.selected)refreshInfo();
+    }catch(e){try{AI.onError('AR render: '+e.message);}catch(_){}}
+  }
+
+  // selection
+  function select(d){
+    S.selected=d||null;
+    if(!d){info.style.display='none';return;}
+    info.style.display='block';refreshInfo(true);
+  }
+  function refreshInfo(force){
+    const d=S.selected;if(!d)return;
+    const up=userPos(),dm=dist(up.lat,up.lng,d.lat,d.lng);
+    const key=d.id+'|'+Math.round(dm)+'|'+d.health;
+    if(!force&&info.dataset.key===key)return;
+    info.dataset.key=key;
+    info.innerHTML=generatePopupContent(d).replace('color:#16a34a','color:#22c55e').replace('color:#64748b','color:#94a3b8')+'<br>📏 '+fmtDist(dm)+
+      '<div class="btn-row"><button class="btn btn-slate" id="ai-close">Close</button><button class="btn btn-purple" id="ai-map">🗺️ Map</button><button class="btn btn-red" id="ai-del">🗑️</button></div>';
+    $('ai-close').onclick=()=>select(null);
+    $('ai-map').onclick=()=>{map.setView([d.lat,d.lng],12);if(d.marker)d.marker.openPopup();showPage('map-page');};
+    $('ai-del').onclick=()=>deleteCreationById(d.id,'removed in AR');
+  }
+  page.addEventListener('click',e=>{
+    if(!S.running||e.target.closest('#ar-controls,#ar-info,#ar-start'))return;
+    if(S.dragMoved)return;
+    const r=page.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+    let best=null,bd=1e9;
+    for(const h of S.hits){const dd=Math.hypot(h.x-x,h.y-y);if(dd<h.r&&dd<bd){bd=dd;best=h.d;}}
+    select(best);
+  });
+
+  // drag to look
+  page.addEventListener('pointerdown',e=>{
+    if(e.target.closest('#ar-controls,#ar-info,#ar-start'))return;
+    S.drag={x:e.clientX,y:e.clientY,yaw:S.manualYaw,pitch:S.manualPitch};S.dragMoved=false;
+    try{page.setPointerCapture(e.pointerId);}catch(_){}
+  });
+  page.addEventListener('pointermove',e=>{
+    if(!S.drag)return;
+    const dx=e.clientX-S.drag.x,dy=e.clientY-S.drag.y;
+    if(Math.abs(dx)+Math.abs(dy)>6)S.dragMoved=true;
+    const k=S.hFov/Math.max(S.w,1);
+    S.manualYaw=S.drag.yaw-dx*k;
+    S.manualPitch=clamp(S.drag.pitch+dy*k,-80,80);
+  });
+  const endDrag=()=>{S.drag=null;setTimeout(()=>{S.dragMoved=false;},50);};
+  page.addEventListener('pointerup',endDrag);page.addEventListener('pointercancel',endDrag);
+
+  // buttons
+  $('ar-start-btn').addEventListener('click',()=>start(true));
+  $('ar-demo-btn').addEventListener('click',()=>start(false));
+  $('ar-stop').addEventListener('click',stop);
+  $('ar-recenter').addEventListener('click',()=>{
+    S.manualYaw=0;S.manualPitch=0;S.headingOffset=0;
+    const up=userPos();let best=null,bd=1e18;
+    creationMarkers.forEach(c=>{const dd=dist(up.lat,up.lng,c.lat,c.lng);if(dd<bd){bd=dd;best=c;}});
+    if(best){const brg=bearingTo(up.lat,up.lng,best.lat,best.lng);S.manualYaw=wrap180(brg-((S.hasCompass?S.heading:0)+S.headingOffset));showToast('🎯 Facing '+best.name);}
+    else showToast('🎯 Calibrated');
+  });
+  $('ar-spawn').addEventListener('click',()=>{
+    const up=userPos();
+    const name=$('object-name').value.trim()||rname();
+    const ctype=creationTypeSelect.value,typeDetail=currentTypeDetail();
+    const distM=clamp(AR_ALT[typeDetail]>0?AR_ALT[typeDetail]*.5+20:25,15,300);
+    const brg=viewYaw(),R=6371000,δ=distM/R,θ=toRad(brg),φ1=toRad(up.lat),λ1=toRad(up.lng);
+    const φ2=Math.asin(Math.sin(φ1)*Math.cos(δ)+Math.cos(φ1)*Math.sin(δ)*Math.cos(θ));
+    const λ2=λ1+Math.atan2(Math.sin(θ)*Math.sin(δ)*Math.cos(φ1),Math.cos(δ)-Math.sin(φ1)*Math.sin(φ2));
+    const now=new Date();
+    const nd=makeCreation(ctype,typeDetail,name,toDeg(φ2),((toDeg(λ2)+540)%360)-180,localDate(now),localTime(now),safeUrl($('quantum-url').value.trim())||null);
+    finishCreate(nd);
+    $('object-name').value='';
+  });
+
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden)pause();else if(currentPage==='ar-page')resume();
+  });
+
+  return{get running(){return S.running;},get selected(){return S.selected;},select,pause,resume,stop,start};
+})();
+
+/* ════════════════════════════════════════════
+   AI DIRECTOR — observes, decides, acts, repairs
+   ════════════════════════════════════════════ */
+const AI=(function(){
+  const A={
+    enabled:true,mode:'balanced',tickMs:6000,target:20,
+    auto:{spawn:true,balance:true,events:true,tune:true,heal:true,cleanup:true},
+    ticks:0,actions:0,repairs:0,errors:0,timer:null,watchdog:null,
+    hadLife:false,suppressSeed:false,errTimes:[],safeUntil:0,score:100
+  };
+  const logBox=$('ai-log');
+  let busy=false;
+
+  const PREY=['Plant','Tree','Flower','Mammal','Bird','Fish','Insect','Reptile','Amphibian','Fungus'];
+  const NATURAL=['Earthquake','Tsunami','Tornado','Hurricane','Flood','Wildfire','Blizzard','Meteor Strike','Plague','Solar Flare'];
+  const rand=a=>a[Math.floor(Math.random()*a.length)];
+
+  function log(msg,cls){
+    cls=cls||'log-ai';
+    const first=logBox.firstElementChild;
+    if(first&&first.dataset&&first.dataset.empty)logBox.innerHTML='';
+    const line=document.createElement('div');
+    line.className='log-line '+cls;
+    line.textContent='['+localTime()+'] '+msg;
+    logBox.prepend(line);
+    while(logBox.children.length>80)logBox.removeChild(logBox.lastChild);
+  }
+
+  // ── persistence ──
+  function saveCfg(){
+    try{localStorage.setItem('creator_ai_v1',JSON.stringify({enabled:A.enabled,mode:A.mode,tickMs:A.tickMs,target:A.target,auto:A.auto}));}catch(e){}
+  }
+  function loadCfg(){
+    try{
+      const c=JSON.parse(localStorage.getItem('creator_ai_v1')||'null');
+      if(!c)return;
+      if(typeof c.enabled==='boolean')A.enabled=c.enabled;
+      if(['balanced','gardener','chaos','observer'].includes(c.mode))A.mode=c.mode;
+      if(isFinite(c.tickMs))A.tickMs=clamp(+c.tickMs,2000,30000);
+      if(isFinite(c.target))A.target=clamp(+c.target,2,100);
+      if(c.auto&&typeof c.auto==='object')Object.keys(A.auto).forEach(k=>{if(typeof c.auto[k]==='boolean')A.auto[k]=c.auto[k];});
+    }catch(e){}
+  }
+  function syncUI(){
+    $('ai-enabled').checked=A.enabled;$('ai-mode').value=A.mode;
+    $('ai-interval').value=A.tickMs/1000;$('ai-interval-val').textContent=(A.tickMs/1000)+' s';
+    $('ai-target').value=A.target;$('ai-target-val').textContent=A.target;
+    Object.keys(A.auto).forEach(k=>{const el=$('ai-a-'+k);if(el)el.checked=A.auto[k];});
+    const pill=$('ai-pill');pill.textContent=A.enabled?'🤖 AI ON':'🤖 AI OFF';pill.className=A.enabled?'':'off';
+    updateStatsUI();
+  }
+  function updateStatsUI(){
+    $('ai-stats').textContent='Ticks '+A.ticks+' · Actions '+A.actions+' · Repairs '+A.repairs+' · Errors caught '+A.errors+' · Mode '+A.mode;
+  }
+
+  // ── helpers ──
+  function userAnchor(){
+    if(selectedLat!==null)return{lat:selectedLat,lng:selectedLng};
+    const c=map.getCenter();return{lat:c.lat,lng:c.lng};
+  }
+  function lifeAnchor(){
+    const orgs=creationMarkers.filter(c=>c.type==='organism');
+    if(orgs.length){const o=rand(orgs);return{lat:o.lat,lng:o.lng};}
+    return userAnchor();
+  }
+  function jitter(a,km){
+    const dl=km/111;
+    return{lat:clamp(a.lat+(Math.random()-.5)*2*dl,-85,85),lng:a.lng+(Math.random()-.5)*2*dl/Math.max(.2,Math.cos(toRad(a.lat)))};
+  }
+  function commit(){saveLS();updateStats();}
+  function spawn(ctype,detail,pos,opts){
+    opts=opts||{};
+    const now=new Date();
+    const nd={
+      id:Date.now()+Math.random(),type:ctype,name:opts.name||rname(),typeDetail:detail,
+      lat:pos.lat,lng:pos.lng,originLat:pos.lat,originLng:pos.lng,
+      date:localDate(now),time:localTime(now),quantumUrl:null,lifespan:0,lifespanUnit:'seconds',
+      health:opts.health||100,birthTime:Date.now(),moveCount:0,intervalId:null
+    };
+    if(ctype==='calamity'){nd.strength=opts.strength||40;nd.radius=opts.radius||10;}
+    registerCreation(nd,true);
+    if(ctype==='calamity'){playSound('calamity');setTimeout(()=>{try{applyCalamity(nd);}catch(e){onError(e.message);}},100);}
+    A.actions++;
+    if(!opts.batch)commit();
+    return nd;
+  }
+  function seed(why){
+    const a=lifeAnchor();
+    const set=[['Plant',4],['Tree',3],['Flower',3],['Mammal',3],['Bird',2],['Fish',2],['Insect',3]];
+    let n=0;
+    set.forEach(pair=>{
+      const base=jitter(a,2);
+      for(let i=0;i<pair[1];i++){spawn('organism',pair[0],jitter(base,1),{batch:true});n++;}
+    });
+    commit();
+    log('🌱 Seeded ecosystem ('+n+' organisms) — '+why);
+  }
+  const weakest=(list,n)=>list.slice().sort((x,y)=>x.health-y.health).slice(0,n);
+  function refreshPopup(o){try{if(o.marker)o.marker.setPopupContent(generatePopupContent(o));updateHistoryItem(o);}catch(e){}}
+  function setSlider(id,val,why){
+    const el=$(id);if(!el)return;
+    val=clamp(+(+val).toFixed(2),+el.min,+el.max);
+    if(+el.value===val)return;
+    el.value=val;el.dispatchEvent(new Event('input'));
+    log('🎚️ '+why+' → '+val);
+  }
+
+  // ── observe ──
+  function observe(){
+    const orgs=creationMarkers.filter(c=>c.type==='organism');
+    const sp={};orgs.forEach(o=>{sp[o.typeDetail]=(sp[o.typeDetail]||0)+1;});
+    const preds=orgs.filter(o=>isPredator(o.typeDetail));
+    return{
+      total:creationMarkers.length,orgs,preds,
+      prey:orgs.filter(o=>!isPredator(o.typeDetail)),species:sp,nsp:Object.keys(sp).length,
+      avgHp:orgs.length?orgs.reduce((s,o)=>s+o.health,0)/orgs.length:0,
+      cals:creationMarkers.filter(c=>c.type==='calamity')
+    };
+  }
+
+  // ── self-heal / diagnostics ──
+  function diagnose(silent){
+    const fixed=[],issues=[];
+    const seen=new Set();
+    creationMarkers.slice().forEach(c=>{
+      try{
+        if(!isFinite(c.lat)||!isFinite(c.lng)||Math.abs(c.lat)>90){fixed.push('Removed item with invalid coordinates ("'+c.name+'")');deleteCreationById(c.id);return;}
+        if(!isFinite(c.health)){c.health=100;fixed.push('Reset invalid health on "'+c.name+'"');}
+        if(c.type!=='calamity'&&c.health<=0){fixed.push('Removed dead "'+c.name+'"');deleteCreationById(c.id,'zero health');return;}
+        if(seen.has(String(c.id))){c.id=Date.now()+Math.random();fixed.push('Re-keyed duplicate id on "'+c.name+'"');}
+        seen.add(String(c.id));
+        if(!c.marker){attachMarker(c);fixed.push('Rebuilt missing map marker for "'+c.name+'"');}
+        else if(markersVisible&&!markerCluster.hasLayer(c.marker)){markerCluster.addLayer(c.marker);fixed.push('Re-attached marker for "'+c.name+'"');}
+        if(!findItemEl(c.id)){addHistoryItem(c);fixed.push('Restored list entry for "'+c.name+'"');}
+        if(c.type==='organism'&&movementEnabled&&!c.intervalId){startOrganismMovement(c);fixed.push('Restarted movement for "'+c.name+'"');}
+        if(c.type!=='organism'&&c.intervalId){clearInterval(c.intervalId);c.intervalId=null;fixed.push('Stopped stray timer on "'+c.name+'"');}
+      }catch(e){issues.push('Item "'+(c&&c.name)+'": '+e.message);}
+    });
+    Array.from(historyDiv.children).forEach(el=>{
+      if(!creationMarkers.some(c=>String(c.id)===el.dataset.id)){el.remove();fixed.push('Removed orphan list entry');}
+    });
+    if(!ecoIntervalId){startEcologyInterval();fixed.push('Restarted ecology timer');}
+    if(countOrganisms()>maxPopulation*1.5){
+      const extra=countOrganisms()-maxPopulation;
+      weakest(creationMarkers.filter(c=>c.type==='organism'),extra).forEach(o=>deleteCreationById(o.id,'AI overflow cull'));
+      fixed.push('Culled '+extra+' organisms over the population cap');
+    }
+    if(currentPage==='map-page'&&map.getSize().y<10){map.invalidateSize();fixed.push('Reflowed map size');}
+    try{localStorage.setItem('__ai_probe','1');localStorage.removeItem('__ai_probe');}
+    catch(e){issues.push('Browser storage unavailable — progress cannot be saved');}
+    if(fixed.length){commit();A.repairs+=fixed.length;}
+    A.score=clamp(100-issues.length*20-Math.min(20,fixed.length*2),0,100);
+    renderHealth(fixed,issues);
+    if(fixed.length)log('🔧 Repaired '+fixed.length+' issue(s): '+fixed.slice(0,3).join('; ')+(fixed.length>3?'…':''),'log-fix');
+    else if(!silent)log('✅ Diagnostics complete — no problems found','log-fix');
+    updateStatsUI();
+    return{fixed,issues,score:A.score};
+  }
+  function renderHealth(fixed,issues){
+    $('ai-score').textContent=A.score+'%';
+    $('ai-score').style.color=A.score>80?'#22c55e':A.score>50?'#f59e0b':'#ef4444';
+    $('ai-score-bar').style.width=A.score+'%';
+    const ul=$('ai-issues');ul.innerHTML='';
+    const rows=[].concat(issues.map(t=>'⚠️ '+t),fixed.slice(0,6).map(t=>'🔧 '+t));
+    if(!rows.length)rows.push('✅ No problems detected');
+    rows.forEach(t=>{const li=document.createElement('li');li.textContent=t;ul.appendChild(li);});
+  }
+
+  // ── global error handling ──
+  function onError(msg){
+    if(busy)return;busy=true;
+    try{
+      A.errors++;
+      const now=Date.now();
+      A.errTimes=A.errTimes.filter(t=>now-t<10000);A.errTimes.push(now);
+      log('⚠️ Error caught: '+String(msg||'unknown').slice(0,140)+' — self-repairing','log-err');
+      setTimeout(()=>{try{diagnose(true);}catch(_){}},200);
+      if(A.errTimes.length>=5){
+        const prevEco=ecologyEnabled;
+        A.safeUntil=now+15000;A.errTimes=[];
+        ecologyEnabled=false;$('enable-ecology').checked=false;stopAllMovement();
+        log('🛡️ Error storm — safe mode for 15 s','log-err');
+        setTimeout(()=>{
+          ecologyEnabled=prevEco;$('enable-ecology').checked=prevEco;restartAllMovement();
+          log('✅ Safe mode ended — simulation resumed','log-fix');
+        },15000);
+      }
+    }finally{busy=false;}
+    updateStatsUI();
+  }
+
+  // ── the autonomous loop ──
+  function tick(force){
+    if(!A.enabled&&!force)return;
+    if(Date.now()<A.safeUntil)return;
+    A.ticks++;
+    try{
+      if(A.auto.heal)diagnose(true);
+      const o=observe();
+      if(o.orgs.length)A.hadLife=true;
+      if(A.mode==='observer'&&!force){updateStatsUI();return;}
+      let acts=0;const max=3;
+
+      // extinction / empty world
+      if(!o.orgs.length){
+        if(A.auto.spawn&&!A.suppressSeed&&(o.total===0||A.hadLife)){
+          seed(A.hadLife?'extinction detected':'empty world');A.hadLife=true;updateStatsUI();return;
+        }
+      }
+      if(o.orgs.length){
+        // predator / prey balance
+        if(A.auto.balance&&acts<max){
+          if(o.preds.length&&!o.prey.length&&countOrganisms()<maxPopulation){
+            const a=o.preds[0];for(let i=0;i<3;i++)spawn('organism',rand(PREY),jitter(a,2),{batch:true});
+            commit();acts++;log('🐇 No prey left — introduced prey to sustain predators');
+          }else if(o.orgs.length>4&&o.preds.length/o.orgs.length>.4){
+            const v=weakest(o.preds,1)[0];deleteCreationById(v.id,'AI predator control');
+            acts++;log('⚖️ Too many predators — removed "'+v.name+'"');
+          }
+        }
+        // under-population
+        if(A.auto.spawn&&acts<max&&A.mode!=='chaos'&&o.orgs.length<A.target*.4&&countOrganisms()<maxPopulation){
+          const fit=o.orgs.filter(x=>x.health>50);const pick=rand(fit.length?fit:o.orgs);
+          for(let i=0;i<2;i++)spawn('organism',pick.typeDetail,jitter(pick,1),{batch:true});
+          commit();acts++;log('🌿 Population low ('+o.orgs.length+'/'+A.target+') — introduced 2 × '+pick.typeDetail);
+        }
+        // diversity
+        if(A.auto.spawn&&acts<max&&(A.mode==='balanced'||A.mode==='gardener')&&o.nsp===1&&o.orgs.length>=4&&countOrganisms()<maxPopulation){
+          const absent=PREY.filter(t=>!o.species[t]);
+          if(absent.length){
+            const t=rand(absent),a=rand(o.orgs);
+            for(let i=0;i<2;i++)spawn('organism',t,jitter(a,1),{batch:true});
+            commit();acts++;log('🧬 Low diversity — introduced '+t);
+          }
+        }
+        // over-population
+        const over=o.orgs.length>=maxPopulation||o.orgs.length>A.target*1.5;
+        if(over&&acts<max){
+          if(A.mode==='chaos'&&A.auto.events){
+            spawn('calamity','Plague',rand(o.orgs),{strength:30,radius:15});
+            acts++;log('🦠 Overpopulation — AI unleashed a Plague');
+          }else if(A.auto.balance){
+            const k=Math.max(1,Math.ceil(o.orgs.length*.1));
+            weakest(o.orgs,k).forEach(v=>deleteCreationById(v.id,'AI culling'));
+            acts++;log('✂️ Culled '+k+' weakest organisms to relieve overpopulation');
+          }
+        }
+        // chaos events
+        if(A.mode==='chaos'&&A.auto.events&&acts<max&&o.orgs.length>=3&&Math.random()<.25){
+          const t=rand(NATURAL),a=rand(o.orgs);
+          spawn('calamity',t,jitter(a,3),{strength:20+Math.floor(Math.random()*40),radius:3+Math.floor(Math.random()*22)});
+          acts++;log('🔥 Chaos mode: '+t+' unleashed');
+        }
+        // gardener nurturing
+        if(A.mode==='gardener'&&A.auto.heal&&o.avgHp<75){
+          const weak=o.orgs.filter(x=>x.health<60);
+          weak.forEach(x=>{x.health=Math.min(100,x.health+20);refreshPopup(x);});
+          if(weak.length){acts++;A.actions++;log('💚 Nursed '+weak.length+' weak organism(s)');}
+        }
+      }
+      // clean up spent events
+      if(A.auto.cleanup){
+        const old=o.cals.filter(c=>Date.now()-c.birthTime>45000);
+        old.forEach(c=>deleteCreationById(c.id,'dissipated'));
+        if(old.length)log('🌫️ '+old.length+' spent event(s) dissipated');
+      }
+      // auto-tune ecology parameters
+      if(A.auto.tune){
+        const op=countOrganisms();
+        if(maxPopulation<A.target)setSlider('max-pop',Math.min(200,A.target+10),'Raised max population to fit target');
+        if(op>=maxPopulation*.95&&reproductionRate>.03)setSlider('repro-rate',reproductionRate-.02,'Slowed reproduction (crowded)');
+        else if(op>0&&op<A.target*.5&&reproductionRate<.35)setSlider('repro-rate',reproductionRate+.02,'Boosted reproduction (sparse)');
+      }
+      updateStats();updateStatsUI();
+    }catch(e){onError('AI tick: '+e.message);}
+  }
+
+  // ── timers ──
+  function startTimer(){
+    clearInterval(A.timer);
+    A.timer=setInterval(()=>{try{tick();}catch(e){onError(e.message);}},A.tickMs);
+  }
+  function startWatchdog(){
+    clearInterval(A.watchdog);
+    A.watchdog=setInterval(()=>{if(A.auto.heal&&Date.now()>=A.safeUntil){try{diagnose(true);}catch(e){onError(e.message);}}},15000);
+  }
+
+  // ── natural-language command parser ──
+  const ALL=[];
+  Object.keys(emojiTypes).forEach(cat=>Object.keys(emojiTypes[cat]).forEach(n=>ALL.push({cat:cat,name:n,key:n.toLowerCase()})));
+  ALL.sort((a,b)=>b.key.length-a.key.length);
+  function findType(s){
+    for(const t of ALL){if(new RegExp('\\b'+t.key.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(e?s)?\\b').test(s))return t;}
+    return null;
+  }
+  const NUMW={one:1,two:2,three:3,four:4,five:5,six:6,seven:7,eight:8,nine:9,ten:10,twenty:20,fifty:50};
+  function findCount(s){
+    const m=s.match(/\b(\d{1,3})\b/);if(m)return clamp(+m[1],1,50);
+    for(const w in NUMW)if(new RegExp('\\b'+w+'\\b').test(s))return NUMW[w];
+    return 1;
+  }
+  function setMode(m){A.mode=m;saveCfg();syncUI();log('🎛️ Mode set to '+m);}
+  function setEnabled(v){A.enabled=v;saveCfg();syncUI();log(v?'🤖 AI resumed control':'🤖 AI paused — simulation runs unattended');}
+  function statusText(){
+    const o=observe();
+    return '📊 '+o.total+' items · '+o.orgs.length+' organisms ('+o.nsp+' species, avg ❤️ '+Math.round(o.avgHp)+') · '+o.cals.length+' events · health '+A.score+'% · mode '+A.mode+(A.enabled?'':' (paused)');
+  }
+  function doCreate(t,n){
+    const ctype=t.cat.toLowerCase(),anchor=userAnchor();
+    if(ctype==='calamity')n=Math.min(n,5);
+    for(let i=0;i<n;i++){
+      const pos=ctype==='calamity'?(i?jitter(anchor,5):anchor):jitter(anchor,ctype==='organism'?3:2);
+      spawn(ctype,t.name,pos,{batch:true,strength:50,radius:10});
+    }
+    commit();A.suppressSeed=false;
+    if(ctype==='organism')A.hadLife=true;
+    try{map.setView([anchor.lat,anchor.lng],Math.max(map.getZoom(),9));}catch(e){}
+    return getEmoji(ctype,t.name)+' Created '+n+' × '+t.name;
+  }
+  const HELP='Try: spawn 5 dragons · trigger earthquake · remove all humans · mode chaos/gardener/balanced/observer · balance · repair · populate · heal all · status · pause · resume · hide markers · show markers · fit · cull · speed fast/slow · enable/disable ecology · go to Manila · open ar/map/list · disable ai · clear all';
+  function exec(s,raw){
+    if(/^(help|\?|commands)\b/.test(s))return HELP;
+    if(/\b(status|report|summary|stats)\b/.test(s))return statusText();
+    let m=s.match(/\bmode\s+(balanced|gardener|chaos|observer)\b/)||s.match(/\b(balanced|gardener|chaos|observer)\s+mode\b/);
+    if(m){setMode(m[1]);return '🎛️ Mode → '+m[1];}
+    m=s.match(/\b(enable|disable|turn on|turn off|activate|deactivate|pause|resume)\s+(the\s+)?ai\b/);
+    if(m){const on=/enable|turn on|activate|resume/.test(m[1]);setEnabled(on);return on?'🤖 AI enabled':'🤖 AI disabled';}
+    m=s.match(/\b(enable|disable)\s+(ecology|reproduction)\b/);
+    if(m){const el=$(m[2]==='ecology'?'enable-ecology':'enable-reproduction');el.checked=m[1]==='enable';el.dispatchEvent(new Event('change'));return '🌿 '+m[2]+' '+m[1]+'d';}
+    m=s.match(/\b(?:open|go to|goto|show)\s+(?:the\s+)?(ar|map|list|ecology|eco|settings|create|ai)(?:\s+(?:tab|page))?$/);
+    if(m){const ids={ar:'ar-page',map:'map-page',list:'list-page',ecology:'eco-page',eco:'eco-page',settings:'settings-page',create:'create',ai:'ai-page'};showPage(ids[m[1]]);return '➡️ Opened '+m[1];}
+    const t=findType(s);
+    if(t&&/\b(remove|delete|kill|clear|destroy|wipe|purge)\b/.test(s)){
+      const victims=creationMarkers.filter(c=>c.typeDetail===t.name);
+      victims.forEach(v=>deleteCreationById(v.id,'AI command'));
+      return '🗑️ Removed '+victims.length+' × '+t.name;
+    }
+    if(/\b(clear|delete|wipe|remove|reset)\b.*\b(all|everything|world)\b/.test(s)){
+      if(!confirm('Delete ALL creations?'))return 'Cancelled.';
+      doDeleteAll();return '🗑️ World cleared';
+    }
+    if(t&&/\b(spawn|create|add|make|summon|generate|place|trigger|cause|unleash|start|strike|bring|release|introduce|give)\b/.test(s))return doCreate(t,findCount(s));
+    if(/\b(populate|seed|genesis|ecosystem|boom)\b/.test(s)){A.suppressSeed=false;seed('manual command');return '🌱 Ecosystem seeded';}
+    if(/\bheal\b/.test(s)){
+      let n=0;creationMarkers.forEach(c=>{if(c.type==='organism'){c.health=100;refreshPopup(c);n++;}});saveLS();return '💚 Healed '+n+' organisms';
+    }
+    if(/\b(repair|fix|debug|diagnos\w*|check)\b/.test(s)){const r=diagnose(false);return '🩺 Health '+r.score+'% — '+r.fixed.length+' fixed, '+r.issues.length+' unresolved';}
+    if(/\bbalance\b/.test(s)){tick(true);return '⚖️ Balance pass complete';}
+    if(/\b(pause|freeze|stop)\b/.test(s)){if(movementEnabled)toggleMoveBtn.click();return '⏸️ Movement paused';}
+    if(/\b(resume|unpause|unfreeze|play)\b/.test(s)){if(!movementEnabled)toggleMoveBtn.click();return '▶️ Movement resumed';}
+    if(/\b(show|unhide)\b.*\b(marker|markers|creations|everything)\b/.test(s)){if(!markersVisible)visBtn.click();return '👁️ Markers shown';}
+    if(/\bhide\b/.test(s)){if(markersVisible)visBtn.click();return '🙈 Markers hidden';}
+    if(/\b(fit|zoom out|show all|center)\b/.test(s)){showPage('map-page');setTimeout(()=>$('center-all-btn').click(),200);return '🌍 Fitting all creations';}
+    if(/\bcull\b/.test(s)){$('cull-btn').click();return '✂️ Cull requested';}
+    if(/\b(export|backup)\b/.test(s)){$('export-btn').click();return '💾 Exporting…';}
+    if(/\bspeed\b/.test(s)){
+      if(/fast|quick|up|high/.test(s)){setSlider('move-speed',400,'Movement speed');return '⚡ Faster movement';}
+      if(/slow|down|low/.test(s)){setSlider('move-speed',3000,'Movement speed');return '🐢 Slower movement';}
+    }
+    m=raw.match(/\b(?:go to|goto|fly to|navigate to|find)\s+(.+)$/i);
+    if(m){
+      const q=m[1].trim();
+      fetch('https://nominatim.openstreetmap.org/search?format=json&limit=1&q='+encodeURIComponent(q))
+        .then(r=>r.json()).then(d=>{
+          if(!d.length){log('🔎 "'+q+'" not found');return;}
+          const lat=parseFloat(d[0].lat),lng=parseFloat(d[0].lon);
+          map.setView([lat,lng],10);placeTargetMarker(lat,lng);log('📍 Moved to '+d[0].display_name.split(',')[0]);
+        }).catch(e=>log('🔎 Search failed: '+e.message,'log-err'));
+      return '🔎 Searching "'+q+'"…';
+    }
+    if(t)return doCreate(t,findCount(s));
+    return '🤔 I did not understand that. Type "help" for commands.';
+  }
+  function run(text){
+    const raw=String(text||'').trim();if(!raw)return;
+    log('› '+raw,'log-you');
+    try{log(exec(raw.toLowerCase(),raw));}
+    catch(e){log('⚠️ Command failed: '+e.message,'log-err');onError('command: '+e.message);}
+    updateStatsUI();
+  }
+
+  // ── UI wiring ──
+  $('ai-enabled').addEventListener('change',e=>setEnabled(e.target.checked));
+  $('ai-pill').addEventListener('click',()=>setEnabled(!A.enabled));
+  $('ai-mode').addEventListener('change',e=>setMode(e.target.value));
+  $('ai-interval').addEventListener('input',e=>{A.tickMs=+e.target.value*1000;$('ai-interval-val').textContent=e.target.value+' s';startTimer();saveCfg();});
+  $('ai-target').addEventListener('input',e=>{A.target=+e.target.value;$('ai-target-val').textContent=e.target.value;saveCfg();});
+  Object.keys(A.auto).forEach(k=>{const el=$('ai-a-'+k);if(el)el.addEventListener('change',e=>{A.auto[k]=e.target.checked;saveCfg();});});
+  $('ai-run').addEventListener('click',()=>{const i=$('ai-cmd');run(i.value);i.value='';});
+  $('ai-cmd').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('ai-run').click();}});
+  document.querySelectorAll('[data-cmd]').forEach(b=>b.addEventListener('click',()=>run(b.dataset.cmd)));
+  $('ai-repair').addEventListener('click',()=>{const r=diagnose(false);showToast('🩺 Health '+r.score+'%',r.issues.length?'warn':'');});
+
+  function init(){
+    loadCfg();syncUI();startTimer();startWatchdog();
+    setTimeout(()=>{try{tick();}catch(e){onError(e.message);}},1500);
+    diagnose(true);
+    log('🤖 AI Director online — mode '+A.mode+'. Type "help" for commands.');
+  }
+
+  return{
+    init,tick,run,diagnose,onError,
+    userActed(){A.suppressSeed=false;},
+    userCleared(){A.suppressSeed=true;A.hadLife=false;}
+  };
+})();
+
+// ── GLOBAL ERROR NET ──
+window.addEventListener('error',e=>{
+  const msg=e&&e.message;
+  if(!msg||/ResizeObserver/i.test(msg))return;
+  if(msg==='Script error.'){AI.onError('external script error');return;}
+  AI.onError(msg+(e.lineno?' (line '+e.lineno+')':''));
+});
+window.addEventListener('unhandledrejection',e=>{
+  const r=e&&e.reason;
+  AI.onError('promise: '+String((r&&r.message)||r||'rejected'));
+});
+
+// ── INIT ──
+startEcologyInterval();
+loadLS();
+const nowD=new Date();
+$('target-date').value=localDate(nowD);
+$('target-time').value=localTime(nowD);
+AI.init();
+window.addEventListener('beforeunload',()=>{try{AR.stop();}catch(e){}});
+
+})();
+</script>
+</body>
+</html>
